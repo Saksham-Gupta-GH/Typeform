@@ -2,22 +2,85 @@
 
 import React, { useState, useEffect } from 'react';
 import { Settings, Plus, GripVertical, Trash2 } from 'lucide-react';
-import { fetchQuestions, createQuestion, updateQuestion, deleteQuestion } from '../../../lib/api';
+import { fetchQuestions, createQuestion, updateQuestion, deleteQuestion, reorderQuestions, Question } from '../../../lib/api';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+// --- Sortable Item Component ---
+function SortableQuestionItem({ id, question, index, isSelected, onSelect, onDelete }: any) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div 
+      ref={setNodeRef} 
+      style={style}
+      onClick={() => onSelect(id)}
+      className={`group flex items-center p-3 border rounded-md cursor-pointer bg-white transition-colors ${
+        isSelected 
+          ? 'bg-blue-50 border-blue-200' 
+          : 'hover:bg-gray-100 border-transparent hover:border-gray-200'
+      }`}
+    >
+      <div {...attributes} {...listeners} className="cursor-grab hover:text-black">
+        <GripVertical size={16} className="text-gray-400 mr-2" />
+      </div>
+      <span className={`text-sm truncate flex-1 ${isSelected ? 'font-medium text-gray-700' : 'text-gray-600'}`}>
+        {index + 1}. {question.title || 'Untitled'}
+      </span>
+      <button onClick={(e) => onDelete(id, e)} className="p-1">
+        <Trash2 size={16} className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+      </button>
+    </div>
+  );
+}
+
 
 export default function BuilderPage({ params }: { params: { id: string } }) {
   const [activeTab, setActiveTab] = useState<'content' | 'design'>('content');
-  const [questions, setQuestions] = useState<any[]>([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   useEffect(() => {
-    // Load questions on mount
     fetchQuestions(params.id)
       .then(data => {
         setQuestions(data);
         if (data.length > 0) setSelectedQuestionId(data[0].id);
       })
-      .catch(err => console.error("Could not fetch backend, using empty state.", err))
+      .catch(err => console.error(err))
       .finally(() => setLoading(false));
   }, [params.id]);
 
@@ -26,9 +89,10 @@ export default function BuilderPage({ params }: { params: { id: string } }) {
       const newQ = await createQuestion(params.id, {
         type: 'short_text',
         title: 'New Question',
-        order_index: questions.length
+        order_index: questions.length,
+        is_required: false
       });
-      setQuestions([...questions, newQ]);
+      setQuestions(prev => [...prev, newQ]);
       setSelectedQuestionId(newQ.id);
     } catch (err) {
       console.error(err);
@@ -39,22 +103,51 @@ export default function BuilderPage({ params }: { params: { id: string } }) {
     e.stopPropagation();
     try {
       await deleteQuestion(id);
-      setQuestions(questions.filter(q => q.id !== id));
+      setQuestions(prev => prev.filter(q => q.id !== id));
       if (selectedQuestionId === id) setSelectedQuestionId(null);
     } catch (err) {
       console.error(err);
     }
   };
 
-  const handleUpdateSelected = async (updates: any) => {
+  const handleUpdateSelected = async (updates: Partial<Question>) => {
     if (!selectedQuestionId) return;
+    
+    // Save previous state for rollback
+    const previousQuestions = [...questions];
+    
+    // Optimistic update
+    setQuestions(prev => prev.map(q => q.id === selectedQuestionId ? { ...q, ...updates } : q));
+    
     try {
-      // Optimistic update
-      setQuestions(questions.map(q => q.id === selectedQuestionId ? { ...q, ...updates } : q));
-      // Server update
       await updateQuestion(selectedQuestionId, updates);
     } catch (err) {
-      console.error(err);
+      console.error("Update failed, rolling back", err);
+      // Rollback on failure
+      setQuestions(previousQuestions);
+    }
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      const oldIndex = questions.findIndex(q => q.id === active.id);
+      const newIndex = questions.findIndex(q => q.id === over.id);
+      
+      const newOrder = arrayMove(questions, oldIndex, newIndex);
+      
+      // Update UI immediately
+      setQuestions(newOrder);
+      
+      // Persist to backend
+      try {
+        const orderedIds = newOrder.map(q => q.id);
+        await reorderQuestions(orderedIds);
+      } catch (err) {
+        console.error("Failed to reorder questions", err);
+        // Optionally revert here
+      }
     }
   };
 
@@ -74,25 +167,28 @@ export default function BuilderPage({ params }: { params: { id: string } }) {
           {loading ? (
             <div className="text-sm text-gray-500">Loading...</div>
           ) : (
-            questions.map((q, idx) => (
-              <div 
-                key={q.id}
-                onClick={() => setSelectedQuestionId(q.id)}
-                className={`group flex items-center p-3 border rounded-md cursor-pointer transition-colors ${
-                  selectedQuestionId === q.id 
-                    ? 'bg-blue-50 border-blue-200' 
-                    : 'hover:bg-gray-100 border-transparent hover:border-gray-200'
-                }`}
+            <DndContext 
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext 
+                items={questions.map(q => q.id)}
+                strategy={verticalListSortingStrategy}
               >
-                <GripVertical size={16} className="text-gray-400 mr-2" />
-                <span className={`text-sm truncate flex-1 ${selectedQuestionId === q.id ? 'font-medium text-gray-700' : 'text-gray-600'}`}>
-                  {idx + 1}. {q.title || 'Untitled'}
-                </span>
-                <button onClick={(e) => handleDeleteQuestion(q.id, e)}>
-                  <Trash2 size={16} className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </button>
-              </div>
-            ))
+                {questions.map((q, idx) => (
+                  <SortableQuestionItem
+                    key={q.id}
+                    id={q.id}
+                    question={q}
+                    index={idx}
+                    isSelected={selectedQuestionId === q.id}
+                    onSelect={setSelectedQuestionId}
+                    onDelete={handleDeleteQuestion}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
           )}
         </div>
       </aside>
