@@ -33,6 +33,22 @@ def read_form(form_id: int, db: Session = Depends(get_db)):
     form.response_count = db.query(models.Response).filter(models.Response.form_id == form.id).count()
     return form
 
+@router.get("/{form_id}/responses")
+def get_form_responses(form_id: int, db: Session = Depends(get_db)):
+    # Simple endpoint to fetch all responses for a form
+    # Including related answers
+    responses = db.query(models.Response).filter(models.Response.form_id == form_id).all()
+    
+    result = []
+    for resp in responses:
+        answers = db.query(models.Answer).filter(models.Answer.response_id == resp.id).all()
+        result.append({
+            "id": resp.id,
+            "submitted_at": resp.submitted_at,
+            "answers": [{"question_id": a.question_id, "value": a.value} for a in answers]
+        })
+    return result
+
 @router.patch("/{form_id}", response_model=schemas.Form)
 def update_form(form_id: int, form_update: schemas.FormUpdate, db: Session = Depends(get_db)):
     db_form = db.query(models.Form).filter(models.Form.id == form_id).first()

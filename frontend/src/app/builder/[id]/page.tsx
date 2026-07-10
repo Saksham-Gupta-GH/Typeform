@@ -21,8 +21,17 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
+interface SortableQuestionItemProps {
+  id: number;
+  question: Question;
+  index: number;
+  isSelected: boolean;
+  onSelect: (id: number) => void;
+  onDelete: (id: number, e: React.MouseEvent) => void;
+}
+
 // --- Sortable Item Component ---
-function SortableQuestionItem({ id, question, index, isSelected, onSelect, onDelete }: any) {
+function SortableQuestionItem({ id, question, index, isSelected, onSelect, onDelete }: SortableQuestionItemProps) {
   const {
     attributes,
     listeners,
@@ -270,9 +279,12 @@ export default function BuilderPage({ params }: { params: { id: string } }) {
                 >
                   <option value="short_text">Short Text</option>
                   <option value="long_text">Long Text</option>
+                  <option value="multiple_choice">Multiple Choice</option>
+                  <option value="dropdown">Dropdown</option>
                   <option value="email">Email</option>
                   <option value="number">Number</option>
-                  <option value="multiple_choice">Multiple Choice</option>
+                  <option value="yes_no">Yes/No</option>
+                  <option value="rating">Rating</option>
                 </select>
              </div>
 

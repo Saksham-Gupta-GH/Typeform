@@ -76,3 +76,9 @@ export async function fetchPublicForm(shareToken: string) {
   if (!res.ok) throw new Error('Failed to fetch public form');
   return res.json();
 }
+
+export async function fetchResponses(formId: string) {
+  const res = await fetch(`${API_BASE_URL}/forms/${formId}/responses`);
+  if (!res.ok) throw new Error('Failed to fetch responses');
+  return res.json();
+}
