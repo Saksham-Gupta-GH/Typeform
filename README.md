@@ -54,11 +54,11 @@ npm run dev
 ```
 The application will run at `http://localhost:3000`.
 
-## Deployment Strategy (Zero Cost, No Credit Card)
+## Deployment Strategy (Free Tier)
 
 Given the constraints of using SQLite (which requires a persistent filesystem), standard serverless platforms for the backend are not viable. 
 - **Frontend**: Deploy directly to **Vercel** for free.
-- **Backend & Database**: Deploy to **PythonAnywhere**. Upload the FastAPI code and the SQLite database. Since PythonAnywhere expects WSGI natively, you can use the built-in ASGI beta or wrap the FastAPI app in `a2wsgi` to serve it seamlessly.
+- **Backend & Database**: Deploy to an **Azure Virtual Machine** (e.g., using the Azure for Students credit). You can clone the repository, install Python/FastAPI, and run the server using `uvicorn` or a process manager like `gunicorn` with persistent disk storage for the SQLite database.
 
 ## Key Features
 
