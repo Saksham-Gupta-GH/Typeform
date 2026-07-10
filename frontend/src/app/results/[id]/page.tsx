@@ -107,7 +107,7 @@ export default function ResultsDashboard({ params }: { params: { id: string } })
                 </thead>
                 <tbody>
                   {tableData.map((row, i) => (
-                    <tr key={row.id} className="bg-white border-b hover:bg-gray-50">
+                    <tr key={String(row.id)} className="bg-white border-b hover:bg-gray-50">
                       <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                         {row.submitted_at}
                       </td>
