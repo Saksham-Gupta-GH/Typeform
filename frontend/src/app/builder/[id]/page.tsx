@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Settings, Plus, GripVertical, Trash2, Smartphone, MonitorPlay, ChevronDown, Sparkles, X, ChevronRight, HelpCircle } from 'lucide-react';
+import { Settings, Plus, GripVertical, Trash2, Smartphone, MonitorPlay, ChevronDown, Sparkles, X, ChevronRight, HelpCircle, LayoutList, Share2, Diamond } from 'lucide-react';
 import { fetchQuestions, createQuestion, updateQuestion, deleteQuestion, reorderQuestions, Question } from '../../../lib/api';
 import {
   DndContext,
