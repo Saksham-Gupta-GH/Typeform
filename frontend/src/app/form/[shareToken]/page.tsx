@@ -2,29 +2,74 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { fetchPublicForm, submitResponse, Question } from '../../../lib/api';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+export interface FormResponse {
+  id: number;
+  title: string;
+  questions: Question[];
+}
 
 export default function RespondentFlow({ params }: { params: { shareToken: string } }) {
-  const [form, setForm] = useState<any>(null);
+  const [form, setForm] = useState<FormResponse | null>(null);
   const [currentQIndex, setCurrentQIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, any>>({});
+  const [answers, setAnswers] = useState<Record<number, string | number>>({});
   const [loading, setLoading] = useState(true);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [validationError, setValidationError] = useState('');
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/forms/public/${params.shareToken}`)
-      .then(res => {
-        if (!res.ok) throw new Error('Form not found');
-        return res.json();
-      })
+    fetchPublicForm(params.shareToken)
       .then(data => setForm(data))
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
   }, [params.shareToken]);
 
+  const validateCurrentQuestion = () => {
+    if (!form) return false;
+    const currentQ = form.questions[currentQIndex];
+    const val = answers[currentQ.id];
+
+    if (currentQ.is_required && (val === undefined || val === '')) {
+      setValidationError('This field is required.');
+      return false;
+    }
+
+    if (val !== undefined && val !== '') {
+      if (currentQ.type === 'email') {
+        const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+        if (!emailRegex.test(String(val))) {
+          setValidationError('Please enter a valid email address.');
+          return false;
+        }
+      }
+      if (currentQ.type === 'number') {
+        const numVal = Number(val);
+        if (isNaN(numVal)) {
+          setValidationError('Please enter a valid number.');
+          return false;
+        }
+        if (currentQ.settings) {
+          if (currentQ.settings.min !== undefined && numVal < currentQ.settings.min) {
+            setValidationError(`Number must be at least ${currentQ.settings.min}.`);
+            return false;
+          }
+          if (currentQ.settings.max !== undefined && numVal > currentQ.settings.max) {
+            setValidationError(`Number must be at most ${currentQ.settings.max}.`);
+            return false;
+          }
+        }
+      }
+    }
+
+    setValidationError('');
+    return true;
+  };
+
   const handleNext = () => {
+    if (!validateCurrentQuestion()) return;
+
     if (form && currentQIndex < form.questions.length - 1) {
       setCurrentQIndex(prev => prev + 1);
     } else {
@@ -45,13 +90,7 @@ export default function RespondentFlow({ params }: { params: { shareToken: strin
         value: val
       }));
 
-      const res = await fetch(`${API_BASE_URL}/forms/public/${params.shareToken}/responses`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answers: formattedAnswers }),
-      });
-      
-      if (!res.ok) throw new Error('Failed to submit');
+      await submitResponse(params.shareToken, formattedAnswers);
       setSubmitted(true);
     } catch (err) {
       alert("Error submitting form");
@@ -72,7 +111,8 @@ export default function RespondentFlow({ params }: { params: { shareToken: strin
   }
 
   const currentQ = form.questions[currentQIndex];
-  const progress = ((currentQIndex) / form.questions.length) * 100;
+  // Calculate progress starting > 0
+  const progress = ((currentQIndex + 1) / form.questions.length) * 100;
 
   return (
     <div className="flex flex-col h-screen bg-white">
@@ -113,17 +153,22 @@ export default function RespondentFlow({ params }: { params: { shareToken: strin
                   autoFocus
                   placeholder="Type your answer here..."
                   value={answers[currentQ.id] || ''}
-                  onChange={(e) => setAnswers({...answers, [currentQ.id]: e.target.value})}
+                  onChange={(e) => {
+                     setAnswers({...answers, [currentQ.id]: e.target.value});
+                     setValidationError('');
+                  }}
                   onKeyDown={handleKeyPress}
                   className="w-full border-b-2 border-gray-300 pb-2 text-2xl outline-none focus:border-blue-600 transition-colors bg-transparent text-blue-800 placeholder-blue-200"
                 />
               ) : currentQ.type === 'multiple_choice' ? (
                 <div className="space-y-3">
-                  {/* Mock options for now, usually fetched from currentQ.settings.options */}
-                  {['Option A', 'Option B', 'Option C'].map((opt, i) => (
+                  {(currentQ.settings?.options || ['Option A', 'Option B']).map((opt, i) => (
                     <div 
                       key={i}
-                      onClick={() => setAnswers({...answers, [currentQ.id]: opt})}
+                      onClick={() => {
+                        setAnswers({...answers, [currentQ.id]: opt});
+                        setValidationError('');
+                      }}
                       className={`p-4 border rounded-md cursor-pointer text-lg transition-colors ${answers[currentQ.id] === opt ? 'bg-blue-50 border-blue-500 text-blue-700 font-medium' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}
                     >
                       {opt}
@@ -135,9 +180,22 @@ export default function RespondentFlow({ params }: { params: { shareToken: strin
                   autoFocus
                   placeholder="Type your answer here..."
                   value={answers[currentQ.id] || ''}
-                  onChange={(e) => setAnswers({...answers, [currentQ.id]: e.target.value})}
+                  onChange={(e) => {
+                     setAnswers({...answers, [currentQ.id]: e.target.value});
+                     setValidationError('');
+                  }}
                   className="w-full border-b-2 border-gray-300 pb-2 text-2xl outline-none focus:border-blue-600 transition-colors bg-transparent text-blue-800 placeholder-blue-200 resize-none h-32"
                 />
+              )}
+
+              {validationError && (
+                <motion.p 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-red-500 text-sm mt-3 bg-red-50 p-2 rounded-md inline-block"
+                >
+                  {validationError}
+                </motion.p>
               )}
             </div>
 

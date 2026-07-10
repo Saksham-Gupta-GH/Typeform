@@ -1,5 +1,11 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
+export interface QuestionSettings {
+  options?: string[];
+  min?: number;
+  max?: number;
+}
+
 export interface Question {
   id: number;
   form_id: number;
@@ -8,7 +14,7 @@ export interface Question {
   description?: string;
   is_required: boolean;
   order_index: number;
-  settings?: any;
+  settings?: QuestionSettings;
 }
 
 export async function fetchQuestions(formId: string): Promise<Question[]> {
@@ -52,5 +58,21 @@ export async function reorderQuestions(questionIds: number[]): Promise<{ message
     body: JSON.stringify({ question_ids: questionIds }),
   });
   if (!res.ok) throw new Error('Failed to reorder questions');
+  return res.json();
+}
+
+export async function submitResponse(shareToken: string, answers: { question_id: number, value: any }[]) {
+  const res = await fetch(`${API_BASE_URL}/forms/public/${shareToken}/responses`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ answers }),
+  });
+  if (!res.ok) throw new Error('Failed to submit response');
+  return res.json();
+}
+
+export async function fetchPublicForm(shareToken: string) {
+  const res = await fetch(`${API_BASE_URL}/forms/public/${shareToken}`);
+  if (!res.ok) throw new Error('Failed to fetch public form');
   return res.json();
 }
