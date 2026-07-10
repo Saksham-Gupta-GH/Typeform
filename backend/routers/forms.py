@@ -87,6 +87,26 @@ def delete_form(form_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Form deleted successfully"}
 
+@router.post("/{form_id}/publish", response_model=schemas.Form)
+def publish_form(form_id: int, db: Session = Depends(get_db)):
+    db_form = db.query(models.Form).filter(models.Form.id == form_id).first()
+    if not db_form:
+        raise HTTPException(status_code=404, detail="Form not found")
+    db_form.status = schemas.FormStatus.published
+    db.commit()
+    db.refresh(db_form)
+    return db_form
+
+@router.post("/{form_id}/unpublish", response_model=schemas.Form)
+def unpublish_form(form_id: int, db: Session = Depends(get_db)):
+    db_form = db.query(models.Form).filter(models.Form.id == form_id).first()
+    if not db_form:
+        raise HTTPException(status_code=404, detail="Form not found")
+    db_form.status = schemas.FormStatus.draft
+    db.commit()
+    db.refresh(db_form)
+    return db_form
+
 # Public endpoint for respondents
 @router.get("/public/{share_token}", response_model=schemas.Form)
 def get_public_form(share_token: str, db: Session = Depends(get_db)):

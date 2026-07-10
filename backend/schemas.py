@@ -71,10 +71,14 @@ class Question(QuestionBase):
     class Config:
         from_attributes = True
 
+class FormStatus(str, Enum):
+    draft = "draft"
+    published = "published"
+
 # --- Form Schemas ---
 class FormBase(BaseModel):
     title: str
-    status: str = "draft"
+    status: FormStatus = FormStatus.draft
 
 class FormCreate(FormBase):
     pass

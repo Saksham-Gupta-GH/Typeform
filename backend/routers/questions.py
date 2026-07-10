@@ -36,10 +36,15 @@ def update_question(question_id: int, question_update: schemas.QuestionUpdate, d
     db.refresh(db_question)
     return db_question
 
+from pydantic import BaseModel
+
+class ReorderRequest(BaseModel):
+    question_ids: List[int]
+
 @router.post("/reorder")
-def reorder_questions(ordered_ids: List[int], db: Session = Depends(get_db)):
+def reorder_questions(payload: ReorderRequest, db: Session = Depends(get_db)):
     # Simple batch update for ordering
-    for index, q_id in enumerate(ordered_ids):
+    for index, q_id in enumerate(payload.question_ids):
         db.query(models.Question).filter(models.Question.id == q_id).update({"order_index": index})
     db.commit()
     return {"message": "Reordered successfully"}
