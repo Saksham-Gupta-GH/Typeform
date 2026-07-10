@@ -61,7 +61,7 @@ export async function reorderQuestions(questionIds: number[]): Promise<{ message
   return res.json();
 }
 
-export async function submitResponse(shareToken: string, answers: { question_id: number, value: any }[]) {
+export async function submitResponse(shareToken: string, answers: { question_id: number, value: string | number | boolean }[]) {
   const res = await fetch(`${API_BASE_URL}/forms/public/${shareToken}/responses`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

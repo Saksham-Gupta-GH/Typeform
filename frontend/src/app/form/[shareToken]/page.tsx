@@ -162,7 +162,7 @@ export default function RespondentFlow({ params }: { params: { shareToken: strin
                 />
               ) : currentQ.type === 'multiple_choice' ? (
                 <div className="space-y-3">
-                  {(currentQ.settings?.options || ['Option A', 'Option B']).map((opt, i) => (
+                  {(currentQ.settings?.options || []).map((opt, i) => (
                     <div 
                       key={i}
                       onClick={() => {

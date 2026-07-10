@@ -270,6 +270,8 @@ export default function BuilderPage({ params }: { params: { id: string } }) {
                 >
                   <option value="short_text">Short Text</option>
                   <option value="long_text">Long Text</option>
+                  <option value="email">Email</option>
+                  <option value="number">Number</option>
                   <option value="multiple_choice">Multiple Choice</option>
                 </select>
              </div>
@@ -296,6 +298,71 @@ export default function BuilderPage({ params }: { params: { id: string } }) {
                   className="w-full border border-gray-300 rounded-md p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 ></textarea>
              </div>
+
+             {/* Dynamic Settings */}
+             {selectedQuestion.type === 'multiple_choice' && (
+               <div className="pt-4 border-t border-gray-200">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Options</label>
+                  <div className="space-y-2">
+                    {(selectedQuestion.settings?.options || []).map((opt, i) => (
+                      <div key={i} className="flex items-center space-x-2">
+                        <input 
+                          type="text" 
+                          value={opt}
+                          onChange={(e) => {
+                            const newOptions = [...(selectedQuestion.settings?.options || [])];
+                            newOptions[i] = e.target.value;
+                            handleUpdateSelected({ settings: { ...selectedQuestion.settings, options: newOptions } });
+                          }}
+                          className="flex-1 border border-gray-300 rounded-md p-1.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button 
+                          onClick={() => {
+                            const newOptions = (selectedQuestion.settings?.options || []).filter((_, idx) => idx !== i);
+                            handleUpdateSelected({ settings: { ...selectedQuestion.settings, options: newOptions } });
+                          }}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))}
+                    <button 
+                      onClick={() => {
+                        const newOptions = [...(selectedQuestion.settings?.options || []), `Option ${(selectedQuestion.settings?.options?.length || 0) + 1}`];
+                        handleUpdateSelected({ settings: { ...selectedQuestion.settings, options: newOptions } });
+                      }}
+                      className="text-blue-600 text-sm font-medium hover:underline flex items-center"
+                    >
+                      <Plus size={14} className="mr-1" /> Add Option
+                    </button>
+                  </div>
+               </div>
+             )}
+
+             {selectedQuestion.type === 'number' && (
+               <div className="pt-4 border-t border-gray-200 space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Minimum Value</label>
+                    <input 
+                      type="number"
+                      value={selectedQuestion.settings?.min ?? ''}
+                      onChange={(e) => handleUpdateSelected({ settings: { ...selectedQuestion.settings, min: e.target.value ? Number(e.target.value) : undefined } })}
+                      className="w-full border border-gray-300 rounded-md p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Maximum Value</label>
+                    <input 
+                      type="number"
+                      value={selectedQuestion.settings?.max ?? ''}
+                      onChange={(e) => handleUpdateSelected({ settings: { ...selectedQuestion.settings, max: e.target.value ? Number(e.target.value) : undefined } })}
+                      className="w-full border border-gray-300 rounded-md p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500" 
+                    />
+                  </div>
+               </div>
+             )}
+
            </div>
         </aside>
       )}
