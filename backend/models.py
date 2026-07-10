@@ -12,6 +12,7 @@ class Form(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
+    description = Column(String, nullable=True)
     status = Column(String, default="draft") # draft or published
     share_token = Column(String, unique=True, index=True, default=generate_share_token)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -19,6 +20,10 @@ class Form(Base):
 
     questions = relationship("Question", back_populates="form", cascade="all, delete-orphan", order_by="Question.order_index")
     responses = relationship("Response", back_populates="form", cascade="all, delete-orphan")
+
+    @property
+    def is_published(self):
+        return self.status == "published"
 
 class Question(Base):
     __tablename__ = "questions"

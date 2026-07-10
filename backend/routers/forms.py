@@ -16,7 +16,9 @@ def create_form(form: schemas.FormCreate, db: Session = Depends(get_db)):
     db.add(db_form)
     db.commit()
     db.refresh(db_form)
+    db_form.response_count = 0
     return db_form
+
 
 @router.get("/", response_model=List[schemas.Form])
 def read_forms(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
@@ -56,12 +58,20 @@ def update_form(form_id: int, form_update: schemas.FormUpdate, db: Session = Dep
         raise HTTPException(status_code=404, detail="Form not found")
     
     update_data = form_update.model_dump(exclude_unset=True)
+    
+    # Handle is_published alias
+    if "is_published" in update_data:
+        is_pub = update_data.pop("is_published")
+        update_data["status"] = "published" if is_pub else "draft"
+    
     for key, value in update_data.items():
         setattr(db_form, key, value)
         
     db.commit()
     db.refresh(db_form)
+    db_form.response_count = db.query(models.Response).filter(models.Response.form_id == db_form.id).count()
     return db_form
+
 
 @router.post("/{form_id}/duplicate", response_model=schemas.Form)
 def duplicate_form(form_id: int, db: Session = Depends(get_db)):
@@ -129,6 +139,7 @@ def get_public_form(share_token: str, db: Session = Depends(get_db)):
     form = db.query(models.Form).filter(models.Form.share_token == share_token, models.Form.status == "published").first()
     if not form:
         raise HTTPException(status_code=404, detail="Form not found or not published")
+    form.response_count = db.query(models.Response).filter(models.Response.form_id == form.id).count()
     return form
 
 # Responses nested under public form

@@ -1,0 +1,9 @@
+context.md
+Screenshot*.png
+Screenshot*.jpg
+*.DS_Store
+.env.local
+backend/__pycache__/
+backend/venv/
+frontend/.next/
+frontend/node_modules/

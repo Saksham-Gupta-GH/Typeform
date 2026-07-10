@@ -9,9 +9,12 @@ class QuestionType(str, Enum):
     multiple_choice = "multiple_choice"
     dropdown = "dropdown"
     email = "email"
+    phone_number = "phone_number"
     number = "number"
     yes_no = "yes_no"
     rating = "rating"
+    date = "date"
+    statement = "statement"
 
 # --- Answer Schemas ---
 class AnswerBase(BaseModel):
@@ -78,6 +81,7 @@ class FormStatus(str, Enum):
 # --- Form Schemas ---
 class FormBase(BaseModel):
     title: str
+    description: Optional[str] = None
     status: FormStatus = FormStatus.draft
 
 class FormCreate(FormBase):
@@ -85,7 +89,9 @@ class FormCreate(FormBase):
 
 class FormUpdate(BaseModel):
     title: Optional[str] = None
+    description: Optional[str] = None
     status: Optional[FormStatus] = None
+    is_published: Optional[bool] = None  # convenience alias
 
 class Form(FormBase):
     id: int
@@ -94,6 +100,7 @@ class Form(FormBase):
     updated_at: datetime
     questions: List[Question] = []
     response_count: int = 0
+    is_published: bool = False
 
     class Config:
         from_attributes = True
