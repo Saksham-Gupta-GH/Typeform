@@ -9,20 +9,16 @@ router = APIRouter(
     tags=["responses"],
 )
 
-@router.post("/", response_model=schemas.Response)
-def submit_response(response: schemas.ResponseCreate, form_id: int, db: Session = Depends(get_db)):
-    db_response = models.Response(form_id=form_id)
-    db.add(db_response)
-    db.commit()
-    db.refresh(db_response)
-    
-    for ans in response.answers:
-        db_answer = models.Answer(response_id=db_response.id, question_id=ans.question_id, value=ans.value)
-        db.add(db_answer)
-    db.commit()
-    db.refresh(db_response)
-    return db_response
+# NOTE: Public submission route moved to forms.py as /forms/public/{share_token}/responses
 
 @router.get("/form/{form_id}", response_model=List[schemas.Response])
 def get_form_responses(form_id: int, db: Session = Depends(get_db)):
+    # This is intended for the creator dashboard to view all results
     return db.query(models.Response).filter(models.Response.form_id == form_id).all()
+
+@router.get("/{response_id}", response_model=schemas.Response)
+def get_single_response(response_id: int, db: Session = Depends(get_db)):
+    response = db.query(models.Response).filter(models.Response.id == response_id).first()
+    if not response:
+         raise HTTPException(status_code=404, detail="Response not found")
+    return response
