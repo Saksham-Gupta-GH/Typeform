@@ -584,7 +584,7 @@ function RightSidebar({ question, onChange, isWelcome }: {
 // ──────────────────────────────────────────────────────────────
 export default function BuilderPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'content' | 'workflow' | 'connect'>('content');
+  const [activeTab, setActiveTab] = useState<'content'>('content');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [formTitle, setFormTitle] = useState('Untitled form');
@@ -783,17 +783,9 @@ export default function BuilderPage({ params }: { params: { id: string } }) {
         </div>
 
         <div className="flex gap-1 justify-center w-1/3">
-          {(['content', 'workflow', 'connect'] as const).map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 text-sm font-medium rounded-md capitalize transition-colors ${
-                activeTab === tab ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
+          <div className="px-4 py-2 text-sm font-medium rounded-md capitalize transition-colors bg-gray-900 text-white">
+            Content
+          </div>
         </div>
 
         <div className="flex items-center gap-3 w-1/3 justify-end">
@@ -803,20 +795,13 @@ export default function BuilderPage({ params }: { params: { id: string } }) {
           >
             <Share2 size={14}/> Share
           </button>
-          <button className="bg-[#1f7363] hover:bg-[#155a4d] text-white rounded-md px-4 py-1.5 text-sm font-semibold transition-colors">
-            View plans
-          </button>
-          <HelpCircle size={18} className="text-gray-400 cursor-pointer"/>
           <div className="w-8 h-8 rounded-full bg-[#fce8cc] text-[#b85434] flex items-center justify-center font-bold text-xs cursor-pointer">SG</div>
         </div>
       </header>
 
       {/* ── Main Area ── */}
       <div className="flex w-full h-full pt-14">
-
-        {activeTab === 'content' ? (
-          <>
-            {/* ── LEFT SIDEBAR ── */}
+        {/* ── LEFT SIDEBAR ── */}
             <aside className="w-[272px] bg-[#f9f9f9] border-r border-gray-200 flex flex-col flex-shrink-0">
               {/* Mode selector */}
               <div className="p-3 border-b border-gray-200">
@@ -894,17 +879,12 @@ export default function BuilderPage({ params }: { params: { id: string } }) {
                   </button>
                 </div>
                 <div className="flex items-center gap-3 text-gray-500">
-                  <button className="p-1.5 hover:bg-gray-100 rounded-md transition-colors" title="Mobile preview">
-                    <Smartphone size={16}/>
-                  </button>
                   <button
                     onClick={() => selectedQuestion && router.push(`/form/${selectedQuestion.form_id}?preview=1`)}
-                    className="p-1.5 hover:bg-gray-100 rounded-md transition-colors" title="Preview"
+                    className="flex items-center gap-1.5 text-sm font-medium text-gray-700 p-1.5 hover:bg-gray-100 rounded-md transition-colors" title="Preview"
                   >
-                    <Play size={16}/>
+                    <Play size={16}/> Preview
                   </button>
-                  <button className="p-1.5 hover:bg-gray-100 rounded-md transition-colors"><HelpCircle size={16}/></button>
-                  <button className="p-1.5 hover:bg-gray-100 rounded-md transition-colors"><Settings size={16}/></button>
                 </div>
               </div>
 
@@ -947,113 +927,7 @@ export default function BuilderPage({ params }: { params: { id: string } }) {
               onChange={handleUpdateSelected}
               isWelcome={isWelcomeSelected}
             />
-          </>
-        ) : activeTab === 'workflow' ? (
-          /* ── WORKFLOW TAB ── */
-          <div className="flex flex-1 overflow-hidden">
-            <main className="flex-1 bg-[#f5f5f5] relative overflow-hidden">
-              <div className="absolute top-4 left-4 flex gap-4 z-10">
-                <button className={`text-sm font-medium px-1 py-1 border-b-2 transition-colors ${true ? 'border-black text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Branching</button>
-                {['Scoring', 'Tagging', 'Outcome quiz'].map(t => (
-                  <button key={t} className="text-sm font-medium px-1 py-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors">{t}</button>
-                ))}
-                <div className="flex items-center gap-3 ml-4 text-gray-400">
-                  <Play size={16} className="cursor-pointer hover:text-gray-700"/>
-                  <span className="font-medium">{'(x)'}</span>
-                  <RefreshCw size={16} className="cursor-pointer hover:text-gray-700"/>
-                  <Settings size={16} className="cursor-pointer hover:text-gray-700"/>
-                </div>
-              </div>
-
-              {/* Workflow nodes */}
-              <div className="absolute top-1/2 left-8 right-[320px] -translate-y-1/2 overflow-x-auto">
-                <div className="flex items-center gap-0 min-w-max px-4">
-                  {questions.map((q, i) => (
-                    <React.Fragment key={q.id}>
-                      <div className="flex flex-col items-center">
-                        <div className="w-12 h-12 bg-white rounded-xl border-2 border-gray-200 flex items-center justify-center shadow-sm cursor-pointer hover:border-blue-400 transition-colors">
-                          <TypeIcon type={q.type} />
-                        </div>
-                        <span className="text-xs text-gray-500 mt-1">{i + 1}</span>
-                      </div>
-                      {i < questions.length - 1 && (
-                        <div className="w-12 h-0.5 bg-gray-300 flex items-center justify-center">
-                          <div className="w-3 h-3 rounded-full bg-gray-900 text-white flex items-center justify-center text-[8px] flex-shrink-0">→</div>
-                        </div>
-                      )}
-                    </React.Fragment>
-                  ))}
-                </div>
-              </div>
-
-              {/* Bottom controls */}
-              <div className="absolute bottom-4 left-4 flex gap-3 text-gray-400">
-                <button className="hover:text-gray-700 text-lg font-medium">-</button>
-                <button className="hover:text-gray-700 text-lg font-medium">+</button>
-                <button className="hover:text-gray-700"><Monitor size={16}/></button>
-                <button className="hover:text-gray-700"><RotateCcw size={16}/></button>
-              </div>
-            </main>
-
-            {/* Workflow right panel */}
-            <aside className="w-[300px] bg-white border-l border-gray-200 p-5">
-              <h3 className="font-semibold text-gray-900 mb-5">Actions</h3>
-              <div className="space-y-5">
-                <div className="border border-gray-200 rounded-xl p-4">
-                  <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mb-3">
-                    <LayoutList size={18} className="text-gray-500"/>
-                  </div>
-                  <h4 className="font-semibold text-sm text-gray-900 mb-1">Connect</h4>
-                  <div className="flex gap-2 mt-3">
-                    <div className="w-8 h-8 bg-green-100 rounded-md"/>
-                    <div className="w-8 h-8 bg-green-600 rounded-md"/>
-                    <div className="w-8 h-8 bg-red-500 rounded-md"/>
-                    <button className="w-8 h-8 border border-gray-200 rounded-md flex items-center justify-center text-gray-400 hover:bg-gray-50"><Plus size={14}/></button>
-                  </div>
-                </div>
-
-                <div className="border border-gray-200 rounded-xl p-4">
-                  <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mb-3">
-                    <Sparkles size={18} className="text-gray-500"/>
-                  </div>
-                  <h4 className="font-semibold text-sm text-gray-900 mb-1">Automations <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded ml-1">New</span></h4>
-                  <p className="text-xs text-gray-500">Activate automations based on submissions to this form.</p>
-                </div>
-
-                <div className="border border-gray-200 rounded-xl p-4">
-                  <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mb-3">
-                    <Settings size={18} className="text-gray-500"/>
-                  </div>
-                  <h4 className="font-semibold text-sm text-gray-900 mb-1">Contacts</h4>
-                  <p className="text-xs text-gray-500">Map form responses to create or update your contacts.</p>
-                </div>
-              </div>
-            </aside>
-          </div>
-        ) : (
-          /* ── CONNECT TAB ── */
-          <div className="flex-1 flex items-center justify-center bg-gray-50">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <LayoutList size={28} className="text-gray-300"/>
-              </div>
-              <h3 className="text-lg font-medium text-gray-700 mb-2">Connect integrations</h3>
-              <p className="text-sm text-gray-400">Coming soon</p>
-            </div>
-          </div>
-        )}
       </div>
-
-      {/* Bottom AI Chat in Workflow/Connect */}
-      {activeTab !== 'content' && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-10">
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 px-4 py-3 flex items-center gap-3 w-[400px]">
-            <Mic size={18} className="text-gray-400"/>
-            <input type="text" placeholder="Chat to create" className="flex-1 outline-none text-sm text-gray-700 placeholder-gray-400 bg-transparent"/>
-            <Send size={16} className="text-gray-300"/>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

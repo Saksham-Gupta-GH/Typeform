@@ -12,7 +12,8 @@ app = FastAPI(title="Typeform Clone API")
 # Configure CORS
 origins = [
     "http://localhost:3000",
-    "https://your-vercel-app.vercel.app",  # Update this with actual vercel domain
+    "http://20.219.130.205",
+    "http://20.219.130.205:3000",
 ]
 
 # Allow overriding via environment variable

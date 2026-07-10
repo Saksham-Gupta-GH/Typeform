@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { fetchQuestions, fetchResponses, Question, FormSubmission } from '../../../lib/api';
-import { BarChart, Users, Clock, ArrowLeft } from 'lucide-react';
+import { BarChart, Users, Clock, ArrowLeft, Download } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ResultsDashboard({ params }: { params: { id: string } }) {
@@ -38,6 +38,58 @@ export default function ResultsDashboard({ params }: { params: { id: string } })
     });
     return row;
   });
+
+  const downloadCSV = () => {
+    if (responses.length === 0) return;
+    
+    // Headers
+    const headers = ['Submitted At', ...questions.map(q => `"${q.title.replace(/"/g, '""')}"`)];
+    
+    // Rows
+    const rows = tableData.map(row => {
+      return [
+        `"${String(row.submitted_at).replace(/"/g, '""')}"`,
+        ...questions.map(q => {
+          const val = row[q.id];
+          return val !== undefined ? `"${String(val).replace(/"/g, '""')}"` : '""';
+        })
+      ];
+    });
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(r => r.join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `form_${params.id}_results.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const getChartData = (question: Question) => {
+    if (!['multiple_choice', 'dropdown', 'yes_no'].includes(question.type)) return null;
+    
+    const counts: Record<string, number> = {};
+    responses.forEach(r => {
+      const answer = r.answers.find(a => a.question_id === question.id);
+      if (answer && answer.value !== null && answer.value !== undefined) {
+        counts[String(answer.value)] = (counts[String(answer.value)] || 0) + 1;
+      }
+    });
+
+    const options = question.type === 'yes_no' ? ['Yes', 'No'] : (question.settings?.options || []);
+    
+    return options.map((opt: string) => ({
+      label: opt,
+      count: counts[opt] || 0,
+      percentage: totalResponses > 0 ? Math.round(((counts[opt] || 0) / totalResponses) * 100) : 0
+    }));
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -83,10 +135,49 @@ export default function ResultsDashboard({ params }: { params: { id: string } })
           </div>
         </div>
 
+        {/* Charts Section */}
+        {totalResponses > 0 && questions.some(q => ['multiple_choice', 'dropdown', 'yes_no'].includes(q.type)) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {questions.map(q => {
+              const chartData = getChartData(q);
+              if (!chartData) return null;
+              return (
+                <div key={q.id} className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                  <h3 className="font-semibold text-gray-800 mb-4 truncate" title={q.title}>{q.title}</h3>
+                  <div className="space-y-4">
+                    {chartData.map((data: any, idx: number) => (
+                      <div key={idx}>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="font-medium text-gray-700 truncate mr-4">{data.label}</span>
+                          <span className="text-gray-500 whitespace-nowrap">{data.count} ({data.percentage}%)</span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-2.5">
+                          <div 
+                            className="bg-blue-600 h-2.5 rounded-full transition-all duration-500" 
+                            style={{ width: `${data.percentage}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {/* Responses Table */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-4 border-b border-gray-200">
+          <div className="p-4 border-b border-gray-200 flex justify-between items-center">
             <h3 className="font-semibold text-gray-800">Individual Responses</h3>
+            {responses.length > 0 && (
+              <button 
+                onClick={downloadCSV}
+                className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-black border border-gray-300 rounded px-3 py-1.5 hover:bg-gray-50 transition-colors"
+              >
+                <Download size={16} /> Download CSV
+              </button>
+            )}
           </div>
           {responses.length === 0 ? (
             <div className="p-8 text-center text-gray-500">

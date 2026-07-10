@@ -86,6 +86,9 @@ Rules:
 
   if (!response.ok) {
     const errorText = await response.text();
+    if (response.status === 429) {
+      throw new Error('AI is currently busy due to high demand. Please try again in a few seconds.');
+    }
     throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
   }
 

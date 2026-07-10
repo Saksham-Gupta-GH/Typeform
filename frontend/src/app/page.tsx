@@ -221,18 +221,12 @@ export default function WorkspaceDashboard() {
               <button onClick={() => router.push(`/builder/${contextMenu.formId}`)} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3">
                 <FileText size={14} className="text-gray-400" /> Content
               </button>
-              <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3">
-                <ExternalLink size={14} className="text-gray-400" /> Workflow
-              </button>
               <div className="border-t border-gray-100 my-1" />
               <button onClick={() => startRename(formContextMenuForm)} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3">
                 <Edit3 size={14} className="text-gray-400" /> Rename
               </button>
               <button onClick={() => handleDuplicate(contextMenu.formId)} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3">
                 <Copy size={14} className="text-gray-400" /> Duplicate
-              </button>
-              <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3">
-                <Move size={14} className="text-gray-400" /> Move to <span className="ml-auto"><ChevronDown size={12} /></span>
               </button>
               <div className="border-t border-gray-100 my-1" />
               <button onClick={() => handleDelete(contextMenu.formId)} className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3">
@@ -266,13 +260,9 @@ export default function WorkspaceDashboard() {
             </div>
 
             <div className="space-y-1">
-              <div className="flex items-center justify-between px-2 py-1.5 text-sm">
-                <span className="font-medium text-gray-800 flex items-center"><LayoutGrid size={16} className="mr-3 text-gray-500"/> Workspaces</span>
-                <button className="p-1 border rounded text-gray-500 hover:border-gray-400"><Plus size={14}/></button>
-              </div>
               <div className="mt-2">
                 <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider flex justify-between cursor-pointer hover:bg-gray-100 rounded">
-                  Private <ChevronUp size={12} />
+                  My Forms
                 </div>
                 <div className="mt-1">
                   <div className="px-2 py-2 text-sm text-gray-900 bg-gray-200/50 rounded-md font-medium flex justify-between items-center cursor-pointer">
@@ -284,16 +274,8 @@ export default function WorkspaceDashboard() {
           </div>
         </div>
 
-        {/* Bottom: responses + AI button */}
+        {/* Bottom AI button */}
         <div className="p-4 border-t border-gray-200">
-          <div className="mb-4">
-            <div className="text-sm font-medium text-gray-800 mb-2">Responses collected</div>
-            <div className="h-1.5 w-full bg-gray-200 rounded-full mb-2">
-              <div className="h-1.5 bg-gray-300 rounded-full w-0"/>
-            </div>
-            <div className="text-xs text-gray-500 mb-3">0 / 10</div>
-            <button className="text-xs font-medium border border-gray-300 rounded px-3 py-1.5 hover:bg-gray-50">Increase response limit</button>
-          </div>
           <button onClick={() => setAiSidebarOpen(true)} className="w-full border border-purple-200 bg-purple-50/30 rounded-lg p-2.5 flex items-center cursor-pointer hover:bg-purple-50 transition-colors group">
             <Mic size={16} className="text-gray-500 mr-3" />
             <span className="text-sm font-medium text-gray-700 flex-1 text-left group-hover:text-purple-900">Ask Typeform AI</span>
@@ -308,29 +290,12 @@ export default function WorkspaceDashboard() {
         <header className="h-[52px] border-b border-gray-200 flex justify-between items-center px-4 bg-white flex-shrink-0">
           <div className="flex items-center h-full">
             <div className="flex space-x-1 h-full">
-              <button className="px-4 h-full border-b-2 border-black font-semibold text-sm flex items-center gap-2">
+              <div className="px-4 h-full border-b-2 border-black font-semibold text-sm flex items-center gap-2">
                 <FileText size={15}/> Forms
-              </button>
-              <button className="px-4 h-full text-gray-500 hover:text-black font-medium text-sm flex items-center gap-2 border-b-2 border-transparent">
-                <Users size={15}/> Contacts
-              </button>
-              <button className="px-4 h-full text-gray-500 hover:text-black font-medium text-sm flex items-center gap-2 border-b-2 border-transparent">
-                <Zap size={15}/> Automations
-              </button>
-              <button className="px-4 h-full text-gray-500 hover:text-black font-medium text-sm flex items-center gap-2 border-b-2 border-transparent">
-                <ExternalLink size={14}/> Research Flow
-                <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">Demo</span>
-              </button>
+              </div>
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <button className="text-sm font-medium text-gray-600 hover:text-black flex items-center gap-1.5">
-              <LayoutGrid size={16}/> Integrations
-            </button>
-            <button className="text-sm font-medium text-gray-600 hover:text-black flex items-center gap-1.5">
-              <Diamond size={16}/> Brand kit
-            </button>
-            <HelpCircle size={20} className="text-gray-400 hover:text-gray-600 cursor-pointer"/>
             <div className="w-8 h-8 rounded-full bg-[#fce8cc] text-[#b85434] flex items-center justify-center font-bold text-xs cursor-pointer">SG</div>
           </div>
         </header>
@@ -356,22 +321,12 @@ export default function WorkspaceDashboard() {
             <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-normal text-gray-900">My workspace</h1>
-                <button className="text-gray-400 hover:text-gray-600"><MoreHorizontal size={20}/></button>
-                <button className="text-sm text-gray-600 flex items-center font-medium border border-gray-200 rounded px-3 py-1.5 hover:bg-gray-50">
-                  <Users size={14} className="mr-2"/> Invite <Diamond size={12} className="ml-2 text-teal-600"/>
-                </button>
               </div>
               <div className="flex gap-3">
-                <button className="text-sm text-gray-600 flex items-center font-medium border border-gray-200 rounded px-3 py-1.5 hover:bg-gray-50">
-                  <Calendar size={14} className="mr-2"/> Date created <ChevronDown size={14} className="ml-2"/>
-                </button>
                 <div className="flex border border-gray-200 rounded overflow-hidden">
-                  <button className="px-3 py-1.5 bg-gray-100 text-gray-800 flex items-center font-medium text-sm gap-1.5">
+                  <div className="px-3 py-1.5 bg-gray-100 text-gray-800 flex items-center font-medium text-sm gap-1.5">
                     <LayoutList size={14}/> List
-                  </button>
-                  <button className="px-3 py-1.5 bg-white text-gray-500 hover:bg-gray-50 flex items-center font-medium text-sm gap-1.5 border-l border-gray-200">
-                    <LayoutGrid size={14}/> Grid
-                  </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -404,17 +359,15 @@ export default function WorkspaceDashboard() {
 
                 {/* Table Header */}
                 <div className="grid grid-cols-12 gap-4 text-xs font-medium text-gray-500 mb-3 px-4">
-                  <div className="col-span-6"/>
-                  <div className="col-span-1 text-center">Responses</div>
-                  <div className="col-span-1 text-center">Completed</div>
-                  <div className="col-span-2 text-center">Updated</div>
-                  <div className="col-span-2">Integrations</div>
+                  <div className="col-span-8"/>
+                  <div className="col-span-3 text-center">Updated</div>
+                  <div className="col-span-1"></div>
                 </div>
 
                 <div className="space-y-2">
                   {forms.map(form => (
                     <div key={form.id} className="grid grid-cols-12 gap-4 items-center bg-white border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-shadow group">
-                      <div className="col-span-6 flex items-center gap-4">
+                      <div className="col-span-8 flex items-center gap-4">
                         <div className="w-10 h-10 bg-[#c07345] rounded-md flex-shrink-0"/>
                         <div className="flex-1 min-w-0">
                           {renamingId === form.id ? (
@@ -433,15 +386,10 @@ export default function WorkspaceDashboard() {
                           )}
                         </div>
                       </div>
-                      <div className="col-span-1 text-center text-gray-400 text-sm">-</div>
-                      <div className="col-span-1 text-center text-gray-400 text-sm">-</div>
-                      <div className="col-span-2 text-center text-gray-600 text-sm">
+                      <div className="col-span-3 text-center text-gray-600 text-sm">
                         {new Date(form.updated_at || form.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </div>
-                      <div className="col-span-2 flex items-center justify-between">
-                        <div className="w-6 h-6 border border-gray-200 rounded flex items-center justify-center text-gray-400 bg-gray-50">
-                          <LayoutGrid size={12}/>
-                        </div>
+                      <div className="col-span-1 flex items-center justify-end">
                         <button
                           onClick={e => handleContextMenu(e, form.id)}
                           className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-700 transition-opacity p-1 rounded hover:bg-gray-100"
