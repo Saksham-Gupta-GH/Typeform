@@ -1,0 +1,14 @@
+[Unit]
+Description=Gunicorn instance to serve Typeform Clone FastAPI App
+After=network.target
+
+[Service]
+User=azureuser
+Group=www-data
+WorkingDirectory=/home/azureuser/Typeform/backend
+Environment="PATH=/home/azureuser/Typeform/backend/venv/bin"
+Environment="DATABASE_URL=sqlite:///./typeform.db"
+ExecStart=/home/azureuser/Typeform/backend/venv/bin/gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker -b 127.0.0.1:8000
+
+[Install]
+WantedBy=multi-user.target

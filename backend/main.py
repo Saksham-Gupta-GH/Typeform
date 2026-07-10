@@ -2,16 +2,27 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from . import models
 from .database import engine
+import os
 
 # Create the database tables
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Typeform Clone API")
 
-# Configure CORS for Next.js frontend
+# Configure CORS
+origins = [
+    "http://localhost:3000",
+    "https://your-vercel-app.vercel.app",  # Update this with actual vercel domain
+]
+
+# Allow overriding via environment variable
+env_origins = os.getenv("ALLOWED_ORIGINS")
+if env_origins:
+    origins.extend(env_origins.split(","))
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # For development, allow all. Restrict in production.
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
