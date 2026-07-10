@@ -32,8 +32,8 @@ export default function ResultsDashboard({ params }: { params: { id: string } })
   
   // Format answers for table
   const tableData = responses.map(r => {
-    const row: any = { id: r.id, submitted_at: new Date(r.submitted_at).toLocaleString() };
-    r.answers.forEach((a: any) => {
+    const row: Record<string | number, string | number | boolean> = { id: r.id, submitted_at: new Date(r.submitted_at).toLocaleString() };
+    r.answers.forEach((a) => {
       row[a.question_id] = a.value;
     });
     return row;

@@ -20,7 +20,7 @@ export interface Question {
 export interface FormSubmission {
   id: number;
   submitted_at: string;
-  answers: { question_id: number; value: any }[];
+  answers: { question_id: number; value: string | number | boolean }[];
 }
 
 export async function fetchQuestions(formId: string): Promise<Question[]> {
