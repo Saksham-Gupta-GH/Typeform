@@ -85,7 +85,7 @@ class FormCreate(FormBase):
 
 class FormUpdate(BaseModel):
     title: Optional[str] = None
-    status: Optional[str] = None
+    status: Optional[FormStatus] = None
 
 class Form(FormBase):
     id: int
