@@ -10,7 +10,7 @@ export default function WorkspaceDashboard() {
   const [backendStatus, setBackendStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking');
   
   useEffect(() => {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const API_URL = '/api';
     
     // Check Backend Status
     fetch(`${API_URL}/`)
