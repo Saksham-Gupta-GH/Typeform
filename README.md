@@ -2,6 +2,12 @@
 
 A full-stack Typeform clone built with Next.js, FastAPI, and SQLite. This project allows users to create highly customized, interactive forms with a drag-and-drop builder, and provides a polished, animated one-question-at-a-time filling experience for respondents.
 
+## Tech Stack Used
+- **Frontend**: Next.js 14 (App Router), React, TypeScript, TailwindCSS, Framer Motion, @dnd-kit (for drag and drop), lucide-react (for icons).
+- **Backend**: Python 3, FastAPI, SQLAlchemy (ORM), Pydantic.
+- **Database**: SQLite.
+- **AI Integration**: OpenRouter API (`meta-llama/llama-3.2-3b-instruct:free`).
+
 ## System Architecture
 
 The application is split into two distinct tiers:
@@ -66,3 +72,9 @@ Given the constraints of using SQLite (which requires a persistent filesystem), 
 - **Dynamic Type Settings**: The builder intelligently alters the settings panel based on question type (e.g., exposing Min/Max for numbers, or an options array editor for multiple choice).
 - **Keyboard Navigation**: Respondents can speed through forms using purely the `Enter` key.
 - **Optimistic UI Rollbacks**: The builder implements optimistic updates to make the UI feel instantaneous, automatically rolling back state if the server request fails.
+
+## Assumptions Made
+1. **No authentication required for respondents**: As requested by the assignment, anyone with the shareable link can fill out the form.
+2. **Simplified Creator Auth**: Creator authentication is simplified/assumed to be a default logged-in creator, so there is no complex login/signup flow for the workspace admin.
+3. **No 'Useless' UI Elements**: Based on explicit requirements, non-functional placeholder buttons (like "Webhooks", "Integrations", "Logic Jumps") were intentionally omitted to maintain a clean, fully-functional UI without misleading the user.
+4. **Local/VM Deployment**: The app uses SQLite for ease of setup and local/VM deployments. Standard serverless functions (like AWS Lambda or Vercel Serverless) are not ideal for the backend due to SQLite's need for a persistent file system, hence the Azure VM setup.
