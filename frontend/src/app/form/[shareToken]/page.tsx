@@ -175,6 +175,53 @@ export default function RespondentFlow({ params }: { params: { shareToken: strin
                     </div>
                   ))}
                 </div>
+              ) : currentQ.type === 'dropdown' ? (
+                <select
+                  autoFocus
+                  value={String(answers[currentQ.id] || '')}
+                  onChange={(e) => {
+                     setAnswers({...answers, [currentQ.id]: e.target.value});
+                     setValidationError('');
+                  }}
+                  onKeyDown={handleKeyPress}
+                  className="w-full border-b-2 border-gray-300 pb-2 text-2xl outline-none focus:border-blue-600 bg-transparent text-blue-800 cursor-pointer appearance-none"
+                >
+                  <option value="" disabled>Select an option...</option>
+                  {(currentQ.settings?.options || []).map((opt, i) => (
+                    <option key={i} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              ) : currentQ.type === 'yes_no' ? (
+                <div className="flex space-x-4">
+                  {['Yes', 'No'].map((opt) => (
+                    <button 
+                      key={opt}
+                      onClick={() => {
+                        setAnswers({...answers, [currentQ.id]: opt});
+                        setValidationError('');
+                        // Auto advance on yes/no could go here
+                      }}
+                      className={`flex-1 py-4 px-6 border-2 rounded-lg font-bold text-xl transition-all ${answers[currentQ.id] === opt ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300'}`}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              ) : currentQ.type === 'rating' ? (
+                <div className="flex space-x-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button 
+                      key={star}
+                      onClick={() => {
+                        setAnswers({...answers, [currentQ.id]: star});
+                        setValidationError('');
+                      }}
+                      className={`text-5xl transition-colors ${Number(answers[currentQ.id]) >= star ? 'text-yellow-400' : 'text-gray-300 hover:text-gray-400'}`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
               ) : (
                 <textarea 
                   autoFocus

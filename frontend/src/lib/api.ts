@@ -17,6 +17,12 @@ export interface Question {
   settings?: QuestionSettings;
 }
 
+export interface FormSubmission {
+  id: number;
+  submitted_at: string;
+  answers: { question_id: number; value: any }[];
+}
+
 export async function fetchQuestions(formId: string): Promise<Question[]> {
   const res = await fetch(`${API_BASE_URL}/questions/form/${formId}`);
   if (!res.ok) throw new Error('Failed to fetch questions');
