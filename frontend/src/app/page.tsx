@@ -40,9 +40,11 @@ export default function WorkspaceDashboard() {
           </div>
           
           <div className="p-4">
-            <button className="w-full bg-[#352f36] hover:bg-[#2a252b] text-white rounded-md py-2.5 px-4 flex items-center justify-center font-medium transition-colors mb-6 text-sm">
-              <Plus size={16} className="mr-2" /> Create form
-            </button>
+            <Link href="/builder/new">
+              <button className="w-full bg-[#352f36] hover:bg-[#2a252b] text-white rounded-md py-2.5 px-4 flex items-center justify-center font-medium transition-colors mb-6 text-sm">
+                <Plus size={16} className="mr-2" /> Create form
+              </button>
+            </Link>
             
             <div className="relative mb-6">
                <svg className="absolute left-3 top-2.5 text-gray-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -167,23 +169,27 @@ export default function WorkspaceDashboard() {
             <div className="w-full">
               {/* Template Suggestions (Mocked like screenshot) */}
               <div className="grid grid-cols-2 gap-4 mb-8">
-                 <div className="border border-purple-200 rounded-lg p-5 bg-white shadow-sm relative group cursor-pointer hover:border-purple-300">
-                   <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-                   <div className="flex mb-3">
-                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-purple-500 mr-2"><path d="M12 2l3 6 6 1-4 4 1 6-6-3-6 3 1-6-4-4 6-1z"></path></svg>
-                     <p className="text-sm text-gray-800 pr-6">Create an <strong>Obtain informed consent from subjects before data collection in compliance with ethical standards.</strong></p>
+                 <Link href="/builder/new">
+                   <div className="border border-purple-200 rounded-lg p-5 bg-white shadow-sm relative group cursor-pointer hover:border-purple-300 h-full">
+                     <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                     <div className="flex mb-3">
+                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-purple-500 mr-2"><path d="M12 2l3 6 6 1-4 4 1 6-6-3-6 3 1-6-4-4 6-1z"></path></svg>
+                       <p className="text-sm text-gray-800 pr-6">Create an <strong>Obtain informed consent from subjects before data collection in compliance with ethical standards.</strong></p>
+                     </div>
+                     <button className="text-xs font-medium border border-gray-300 rounded px-3 py-1.5 hover:bg-gray-50 text-gray-700 mt-2">Use this form</button>
                    </div>
-                   <button className="text-xs font-medium border border-gray-300 rounded px-3 py-1.5 hover:bg-gray-50 text-gray-700 mt-2">Use this form</button>
-                 </div>
+                 </Link>
                  
-                 <div className="border border-purple-200 rounded-lg p-5 bg-white shadow-sm relative group cursor-pointer hover:border-purple-300">
-                   <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-                   <div className="flex mb-3">
-                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-purple-500 mr-2"><path d="M12 2l3 6 6 1-4 4 1 6-6-3-6 3 1-6-4-4 6-1z"></path></svg>
-                     <p className="text-sm text-gray-800 pr-6">Create a <strong>Collect detailed feedback from participants to improve future research studies and methodologies.</strong></p>
+                 <Link href="/builder/new">
+                   <div className="border border-purple-200 rounded-lg p-5 bg-white shadow-sm relative group cursor-pointer hover:border-purple-300 h-full">
+                     <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                     <div className="flex mb-3">
+                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-purple-500 mr-2"><path d="M12 2l3 6 6 1-4 4 1 6-6-3-6 3 1-6-4-4 6-1z"></path></svg>
+                       <p className="text-sm text-gray-800 pr-6">Create a <strong>Collect detailed feedback from participants to improve future research studies and methodologies.</strong></p>
+                     </div>
+                     <button className="text-xs font-medium border border-gray-300 rounded px-3 py-1.5 hover:bg-gray-50 text-gray-700 mt-2">Use this form</button>
                    </div>
-                   <button className="text-xs font-medium border border-gray-300 rounded px-3 py-1.5 hover:bg-gray-50 text-gray-700 mt-2">Use this form</button>
-                 </div>
+                 </Link>
               </div>
 
               {/* Table Header */}
