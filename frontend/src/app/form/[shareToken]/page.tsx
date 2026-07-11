@@ -340,12 +340,38 @@ export default function RespondentFlow() {
     if (!validate()) return;
     setDirection('down');
 
-    if (currentQIndex < form.questions.length - 1) {
-      setCurrentQIndex(i => i + 1);
+    const currentQuestion = form.questions[currentQIndex];
+    const answer = answers[currentQuestion.id];
+    let nextIndex = currentQIndex + 1;
+
+    const jumps = currentQuestion.settings?.logic_jumps || [];
+    let jumped = false;
+
+    for (const rule of jumps) {
+      if (rule.value === answer) {
+        if (rule.target_id === null) {
+          nextIndex = form.questions.length; // End of form
+        } else {
+          const targetIndex = form.questions.findIndex(q => q.id === rule.target_id);
+          if (targetIndex !== -1) nextIndex = targetIndex;
+        }
+        jumped = true;
+        break;
+      }
+    }
+
+    if (!jumped && currentQuestion.settings?.logic_fallback !== undefined && currentQuestion.settings?.logic_fallback !== null) {
+      const targetIndex = form.questions.findIndex(q => q.id === currentQuestion.settings!.logic_fallback);
+      if (targetIndex !== -1) nextIndex = targetIndex;
+    }
+
+    if (nextIndex < form.questions.length) {
+      setCurrentQIndex(nextIndex);
     } else {
       submitForm();
     }
-  }, [form, currentQIndex, validate]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, currentQIndex, validate, answers]);
 
   const handlePrev = useCallback(() => {
     if (currentQIndex > 0) {

@@ -1086,6 +1086,13 @@ export default function BuilderPage() {
           onClose={() => setLogicModalOpenFor(null)}
           question={questions.find(q => q.id === logicModalOpenFor)!}
           index={questions.findIndex(q => q.id === logicModalOpenFor)}
+          questions={questions}
+          onSave={async (rules, alwaysJumpTo) => {
+            const q = questions.find(q => q.id === logicModalOpenFor)!;
+            const updatedSettings = { ...q.settings, logic_jumps: rules, logic_fallback: alwaysJumpTo };
+            setQuestions(questions.map(qu => qu.id === q.id ? { ...qu, settings: updatedSettings } : qu));
+            await updateQuestion(q.id, { settings: updatedSettings });
+          }}
         />
       )}
     </div>
