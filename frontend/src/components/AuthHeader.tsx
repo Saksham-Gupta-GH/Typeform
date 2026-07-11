@@ -36,11 +36,31 @@ export default function AuthHeader() {
     } else {
       setLoading(false);
     }
+    
+    const handleOpenAuth = () => setShowAuthModal(true);
+    window.addEventListener('open-auth-modal', handleOpenAuth);
+    
+    // Listen for auth state changes from other components
+    const handleAuthStateChange = () => {
+      const saved = localStorage.getItem('typeform_user_auth');
+      if (saved) {
+        setUser(JSON.parse(saved));
+      } else {
+        setUser(null);
+      }
+    };
+    window.addEventListener('auth-state-change', handleAuthStateChange);
+    
+    return () => {
+      window.removeEventListener('open-auth-modal', handleOpenAuth);
+      window.removeEventListener('auth-state-change', handleAuthStateChange);
+    };
   }, []);
 
   const handleSignIn = (token: string, name: string, email: string) => {
     setUser({ name, email, token });
     localStorage.setItem('typeform_user_auth', JSON.stringify({ name, email, token }));
+    window.dispatchEvent(new Event('auth-state-change'));
   };
 
   const handleSignOut = async () => {
@@ -53,6 +73,7 @@ export default function AuthHeader() {
     }
     setUser(null);
     localStorage.removeItem('typeform_user_auth');
+    window.dispatchEvent(new Event('auth-state-change'));
   };
 
   if (loading) {

@@ -30,10 +30,24 @@ export default function WorkspaceDashboard() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSidebarOpen, setAiSidebarOpen] = useState(false);
   const contextMenuRef = useRef<HTMLDivElement>(null);
+  
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    loadForms();
+    const checkAuth = () => {
+      const saved = localStorage.getItem('typeform_user_auth');
+      setIsAuthenticated(!!saved);
+    };
+    checkAuth();
+    window.addEventListener('auth-state-change', checkAuth);
+    return () => window.removeEventListener('auth-state-change', checkAuth);
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadForms();
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const handleClick = () => setContextMenu(null);
@@ -141,6 +155,49 @@ export default function WorkspaceDashboard() {
   }
 
   const formContextMenuForm = forms.find(f => f.id === contextMenu?.formId);
+
+  if (isAuthenticated === null) {
+    return <div className="h-screen bg-white" />;
+  }
+
+  if (isAuthenticated === false) {
+    return (
+      <div className="flex flex-col h-screen bg-[#191919] text-white font-sans overflow-y-auto">
+        {/* Navigation Bar */}
+        <nav className="flex justify-between items-center px-8 py-6 max-w-7xl mx-auto w-full">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-4 bg-white rounded-sm"></div>
+            <span className="text-xl font-bold tracking-tight">Typeform</span>
+          </div>
+          <button 
+            onClick={() => window.dispatchEvent(new Event('open-auth-modal'))}
+            className="px-6 py-2.5 bg-white text-[#191919] text-sm font-semibold rounded-full hover:bg-gray-100 transition-colors"
+          >
+            Sign up
+          </button>
+        </nav>
+
+        {/* Hero Section */}
+        <main className="flex-1 flex flex-col items-center justify-center px-4 mt-16 max-w-4xl mx-auto text-center">
+          <p className="text-[#e1b4f4] text-xs font-semibold tracking-widest uppercase mb-6">
+            AI FORMS & WORKFLOWS
+          </p>
+          <h1 className="text-6xl md:text-8xl font-serif tracking-tight leading-[1.1] mb-8">
+            The form is only<br />the beginning
+          </h1>
+          <p className="text-lg md:text-xl text-gray-300 max-w-2xl mb-12 leading-relaxed">
+            Collect, analyze, and act on customer data<br />with the complete platform for AI forms & workflows.
+          </p>
+          <button 
+            onClick={() => window.dispatchEvent(new Event('open-auth-modal'))}
+            className="px-8 py-4 bg-white text-[#191919] text-lg font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            Get started—it's free
+          </button>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-white font-sans text-gray-900 overflow-hidden">
