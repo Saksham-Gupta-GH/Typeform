@@ -1,0 +1,10 @@
+--- frontend/src/app/builder/[id]/page.tsx
++++ frontend/src/app/builder/[id]/page.tsx
+@@ -9,6 +9,7 @@
+ } from '@dnd-kit/sortable';
+ import { CSS } from '@dnd-kit/utilities';
+ import { fetchQuestions, createQuestion, deleteQuestion, updateQuestion, getForm, updateForm } from '@/lib/api';
++import { motion } from 'framer-motion';
+ 
+ interface Question {
+   id: number;

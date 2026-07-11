@@ -1,0 +1,54 @@
+--- frontend/src/app/builder/[id]/page.tsx
++++ frontend/src/app/builder/[id]/page.tsx
+@@ -9,6 +9,7 @@
+ } from '@dnd-kit/sortable';
+ import { CSS } from '@dnd-kit/utilities';
+ import { fetchQuestions, createQuestion, deleteQuestion, updateQuestion, getForm, updateForm } from '@/lib/api';
++import { motion, AnimatePresence } from 'framer-motion';
+ 
+ interface Question {
+   id: number;
+@@ -344,18 +345,6 @@
+   }
+ 
+-  return (
+-    <AnimatePresence mode="wait">
+-      <motion.div
+-        key={question.id}
+-        initial={{ opacity: 0, y: 15 }}
+-        animate={{ opacity: 1, y: 0 }}
+-        exit={{ opacity: 0, y: -15 }}
+-        transition={{ duration: 0.3, ease: 'easeOut' }}
+-        className="h-full"
+-      >
+-
+   if (isWelcome) {
+     return (
+       <div className="flex flex-col items-center justify-center h-full px-16 text-center">
+@@ -370,12 +359,20 @@
+   const type = question.type;
+   const options = question.settings?.options || [];
+ 
+   return (
+-    <div className="flex flex-col justify-center px-16 py-12 h-full max-w-2xl mx-auto">
++    <AnimatePresence mode="wait">
++      <motion.div
++        key={question.id}
++        initial={{ opacity: 0, y: 15 }}
++        animate={{ opacity: 1, y: 0 }}
++        exit={{ opacity: 0, y: -15 }}
++        transition={{ duration: 0.3, ease: 'easeOut' }}
++        className="flex flex-col justify-center px-16 py-12 h-full max-w-2xl mx-auto"
++      >
+       {question.description && (
+         <p className="text-sm text-gray-500 mb-4">{question.description}</p>
+       )}
+@@ -434,10 +431,9 @@
+       <div className="mt-8">
+         <button className="text-white font-semibold py-2.5 px-6 rounded transition-colors text-sm hover:opacity-90 active:scale-95" style={{ backgroundColor: buttonColor || '#2563eb' }}>OK ✓</button>
+       </div>
+-    </div>
+       </motion.div>
+     </AnimatePresence>
+   );
+ }

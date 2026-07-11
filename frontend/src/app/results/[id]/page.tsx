@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { fetchQuestions, fetchResponses, Question, FormSubmission } from '../../../lib/api';
-import { BarChart, Users, Clock, ArrowLeft, Download, Diamond } from 'lucide-react';
+import { BarChart, Users, Clock, ArrowLeft, Download, Diamond, Calendar, Filter, LayoutList, ArrowUp, ArrowDown, LineChart, Search, Quote } from 'lucide-react';
 import Link from 'next/link';
 import { InsightsCanvas } from './InsightsCanvas';
 
@@ -170,66 +170,90 @@ export default function ResultsDashboard() {
         )}
 
         {activeTab === 'summary' && (
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center space-x-4">
-                <div className="p-3 bg-blue-100 text-blue-600 rounded-full">
-                  <Users size={24} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 font-medium">Total Responses</p>
-                  <h2 className="text-3xl font-bold text-gray-900">{totalResponses}</h2>
-                </div>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center space-x-4">
-                <div className="p-3 bg-green-100 text-green-600 rounded-full">
-                  <BarChart size={24} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 font-medium">Completion Rate</p>
-                  <h2 className="text-3xl font-bold text-gray-900">{totalResponses > 0 ? '100%' : '0%'}</h2>
-                </div>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-center space-x-4">
-                <div className="p-3 bg-purple-100 text-purple-600 rounded-full">
-                  <Clock size={24} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 font-medium">Average Time</p>
-                  <h2 className="text-3xl font-bold text-gray-900">--</h2>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900">Summary</h2>
+              <div className="flex items-center gap-4 text-gray-500">
+                <button className="flex items-center gap-2 px-3 py-1.5 border border-gray-200 rounded text-sm hover:bg-gray-50"><Calendar size={14}/> All time</button>
+                <button className="flex items-center gap-2 px-3 py-1.5 border border-gray-200 rounded text-sm hover:bg-gray-50"><Filter size={14}/> Filters</button>
+                <div className="h-6 w-px bg-gray-200 mx-2"></div>
+                <div className="flex items-center bg-gray-50 border border-gray-200 rounded p-1">
+                  <button className="p-1.5 hover:bg-gray-200 rounded text-gray-700" title="List view"><LayoutList size={16}/></button>
+                  <button className="p-1.5 hover:bg-gray-200 rounded" title="Up"><ArrowUp size={16}/></button>
+                  <button className="p-1.5 hover:bg-gray-200 rounded" title="Down"><ArrowDown size={16}/></button>
+                  <button className="p-1.5 hover:bg-gray-200 rounded text-sm font-bold" title="Numbers">#</button>
+                  <button className="p-1.5 hover:bg-gray-200 rounded text-sm font-bold" title="Percentages">%</button>
                 </div>
               </div>
             </div>
 
-            {totalResponses > 0 && questions.some(q => ['multiple_choice', 'dropdown', 'yes_no'].includes(q.type)) && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {questions.map(q => {
-                  const chartData = getChartData(q);
-                  if (!chartData) return null;
-                  return (
-                    <div key={q.id} className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                      <h3 className="font-semibold text-gray-800 mb-4 truncate" title={q.title}>{q.title}</h3>
-                      <div className="space-y-4">
-                        {chartData.map((data: any, idx: number) => (
-                          <div key={idx}>
-                            <div className="flex justify-between text-sm mb-1">
-                              <span className="font-medium text-gray-700 truncate mr-4">{data.label}</span>
-                              <span className="text-gray-500 whitespace-nowrap">{data.count} ({data.percentage}%)</span>
-                            </div>
-                            <div className="w-full bg-gray-100 rounded-full h-2.5">
-                              <div 
-                                className="bg-blue-600 h-2.5 rounded-full transition-all duration-500" 
-                                style={{ width: `${data.percentage}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        ))}
+            {questions.map((q, index) => {
+              const qResponses = responses.map(r => r.answers.find(a => a.question_id === q.id)?.value).filter(Boolean);
+              const isChartType = ['multiple_choice', 'dropdown', 'yes_no'].includes(q.type);
+              
+              return (
+                <div key={q.id} className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-4">
+                  <div className="flex flex-col gap-2">
+                    <h3 className="text-xl font-medium text-gray-900 flex items-center gap-3">
+                      <div className="flex items-center justify-center bg-blue-100 text-blue-700 font-semibold text-xs px-2 py-1 rounded">
+                        {index + 1}
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                      {q.title}
+                    </h3>
+                    <p className="text-sm text-gray-500 ml-10">
+                      {qResponses.length} out of {totalResponses} people answered this question.
+                    </p>
+                  </div>
+
+                  <div className="ml-10 mt-2">
+                    {isChartType ? (
+                      <div>
+                        <div className="flex gap-2 mb-6">
+                          <button className="px-4 py-1.5 bg-gray-100 text-gray-800 text-sm font-medium rounded-full">Overview</button>
+                          <button className="px-4 py-1.5 text-gray-500 hover:bg-gray-50 text-sm font-medium rounded-full flex items-center gap-1"><LineChart size={14}/> Trends</button>
+                        </div>
+                        <div className="flex items-end gap-2 h-40 border-b border-gray-200 pb-2">
+                          {getChartData(q)?.map((data: any, idx: number) => (
+                            <div key={idx} className="flex-1 flex flex-col items-center justify-end h-full gap-2 relative group">
+                              <span className="text-xs text-purple-600 font-medium">{data.count}</span>
+                              <div 
+                                className="w-full bg-[#d8b4e2] rounded-t-sm transition-all hover:bg-[#c99ad6]" 
+                                style={{ height: `${Math.max(data.percentage, 1)}%` }}
+                              ></div>
+                              <span className="absolute -bottom-6 text-xs text-gray-500 whitespace-nowrap truncate max-w-full px-1">{data.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-4">
+                        <div className="flex items-center gap-4">
+                          <div className="relative max-w-md w-full">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                            <input 
+                              type="text" 
+                              placeholder="Search responses" 
+                              className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-full text-sm outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400"
+                            />
+                          </div>
+                          <span className="text-sm text-gray-500">{qResponses.length} result{qResponses.length !== 1 && 's'}</span>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                          {qResponses.map((val, i) => (
+                            <div key={i} className="p-4 border border-gray-200 rounded-xl">
+                              <Quote className="text-gray-300 mb-2" size={20} />
+                              <p className="text-gray-800 mb-4">{String(val)}</p>
+                              <p className="text-xs text-gray-400">Just now</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
 

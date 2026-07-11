@@ -1,0 +1,10 @@
+--- frontend/src/app/builder/[id]/page.tsx
++++ frontend/src/app/builder/[id]/page.tsx
+@@ -536,6 +536,7 @@
+   const [chatLoading, setChatLoading] = useState(false);
+   const [toast, setToast] = useState('');
+   const [formId, setFormId] = useState<number | null>(null);
++  const signInName = typeof window !== 'undefined' ? localStorage.getItem('user_name') : null;
+ 
+   const sensors = useSensors(
+     useSensor(PointerSensor),

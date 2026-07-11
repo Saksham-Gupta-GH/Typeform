@@ -657,19 +657,32 @@ export default function BuilderPage() {
     load();
   }, [params.id, showToast]);
 
-  const handleAddElement = async (type: string) => {
+  const handleAddElement = async (type: string, insertIndex?: number) => {
     try {
+      const order = insertIndex !== undefined ? insertIndex : questions.length;
       const defaults: Partial<Question> = {
         type,
         title: TYPE_META[type]?.label ? `${TYPE_META[type].label} question` : 'New question',
-        order_index: questions.length,
+        order_index: order,
         is_required: false,
         settings: (type === 'multiple_choice' || type === 'dropdown') ? { options: ['Option 1', 'Option 2'] } : 
                    type === 'rating' ? { min: 1, max: 5 } : undefined,
       };
       console.log('Creating question with:', defaults);
       const newQ = await createQuestion(params.id, defaults);
-      setQuestions(prev => [...prev, newQ]);
+      
+      let newQuestions = [...questions];
+      if (insertIndex !== undefined && insertIndex < questions.length) {
+        newQuestions.splice(insertIndex, 0, newQ);
+        for (let i = insertIndex + 1; i < newQuestions.length; i++) {
+          newQuestions[i].order_index = i;
+        }
+        await reorderQuestions(newQuestions.map(q => q.id));
+      } else {
+        newQuestions.push(newQ);
+      }
+      
+      setQuestions(newQuestions);
       setSelectedId(newQ.id);
       showToast(`✓ Added ${TYPE_META[type]?.label || 'question'}`);
     } catch (err: unknown) {
@@ -727,11 +740,9 @@ export default function BuilderPage() {
       const reordered = arrayMove(questions, oldIdx, newIdx);
       setQuestions(reordered);
       
-      // Update backend with new order
       await reorderQuestions(reordered.map(q => q.id));
     } catch (err) {
       console.error('Drag reorder failed:', err);
-      // Revert on error by reloading questions
       const qs = await fetchQuestions(params.id);
       setQuestions(qs);
     }
@@ -755,7 +766,6 @@ export default function BuilderPage() {
     const newSettings = { ...designSettings, [key]: value };
     setDesignSettings(newSettings);
     
-    // Debounce API call
     clearTimeout((window as any).designTimeout);
     (window as any).designTimeout = setTimeout(() => {
       if (formId) {
@@ -800,14 +810,12 @@ export default function BuilderPage() {
 
   return (
     <div className="flex h-screen bg-[#f3f3f3] font-sans overflow-hidden">
-      {/* Toast */}
       {toast && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white px-5 py-3 rounded-xl text-sm font-medium shadow-xl">
           {toast}
         </div>
       )}
 
-      {/* Add Content Modal */}
       {showAddModal && (
         <AddContentModal
           onClose={() => setShowAddModal(false)}
@@ -816,7 +824,6 @@ export default function BuilderPage() {
         />
       )}
 
-      {/* ── Top Navigation ── */}
       <header className="absolute top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 z-20 flex items-center justify-between px-2 md:px-4">
         <div className="flex items-center gap-1 md:gap-2">
           <button onClick={() => router.push('/')} className="hidden md:flex items-center text-sm text-gray-500 hover:text-gray-800 transition-colors">
@@ -837,7 +844,6 @@ export default function BuilderPage() {
         <div className="hidden md:flex gap-4 justify-center">
           <button onClick={() => setMainTab('content')} className={`text-sm font-medium px-1 py-4 transition-colors ${mainTab === 'content' ? 'text-gray-900 border-b-2 border-gray-900' : 'text-gray-500 hover:text-gray-900'}`}>Content</button>
           <button onClick={() => setMainTab('workflow')} className={`text-sm font-medium px-1 py-4 transition-colors ${mainTab === 'workflow' ? 'text-gray-900 border-b-2 border-gray-900' : 'text-gray-500 hover:text-gray-900'}`}>Workflow</button>
-          <button onClick={() => setMainTab('connect')} className={`text-sm font-medium px-1 py-4 transition-colors ${mainTab === 'connect' ? 'text-gray-900 border-b-2 border-gray-900' : 'text-gray-500 hover:text-gray-900'}`}>Connect</button>
           <button onClick={() => setMainTab('share')} className={`text-sm font-medium px-1 py-4 transition-colors ${mainTab === 'share' ? 'text-gray-900 border-b-2 border-gray-900' : 'text-gray-500 hover:text-gray-900'}`}>Share</button>
           <button onClick={() => router.push(`/results/${formId}`)} className="text-sm font-medium text-gray-500 hover:text-gray-900 px-1 py-4 transition-colors">Results</button>
         </div>
@@ -855,14 +861,11 @@ export default function BuilderPage() {
         </div>
       </header>
 
-      {/* ── Main Area ── */}
       <div className="flex flex-col md:flex-row w-full h-full pt-14 overflow-y-auto md:overflow-hidden">
         
         {mainTab === 'content' && (
           <>
-            {/* ── LEFT SIDEBAR ── */}
             <aside className="w-full md:w-[272px] bg-[#f9f9f9] border-b md:border-b-0 md:border-r border-gray-200 flex flex-col flex-shrink-0 min-h-[300px] md:min-h-0">
-          {/* Sidebar Tabs */}
           <div className="flex items-center p-3 border-b border-gray-200 gap-1">
             <button
               onClick={() => setActiveTab('content')}
@@ -951,9 +954,7 @@ export default function BuilderPage() {
               )}
             </aside>
 
-            {/* ── CENTER CANVAS ── */}
             <main className="flex-1 flex flex-col relative overflow-hidden min-h-[500px] md:min-h-0">
-              {/* Canvas Toolbar */}
               <div className="h-12 flex items-center justify-between px-6 border-b border-gray-200 bg-white/80 backdrop-blur-sm">
                 <div className="flex items-center gap-3">
                   <button
@@ -979,7 +980,6 @@ export default function BuilderPage() {
                 </div>
               </div>
 
-              {/* Canvas */}
               <div className="flex-1 flex items-center justify-center p-8 relative overflow-hidden" style={{ backgroundColor: designSettings.bgColor, fontFamily: designSettings.fontFamily === 'mono' ? 'monospace' : designSettings.fontFamily === 'serif' ? 'serif' : 'sans-serif' }}>
                 <div className="w-full max-w-3xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] rounded-none md:rounded-2xl min-h-[480px] flex flex-col relative overflow-hidden" style={{ backgroundColor: 'white', color: designSettings.textColor }}>
                   <div className="flex-1">
@@ -987,7 +987,6 @@ export default function BuilderPage() {
                   </div>
                 </div>
 
-                {/* Chat to create */}
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-lg">
                   <div className={`bg-white rounded-2xl shadow-lg border px-4 py-3 flex items-center gap-3 transition-colors ${chatLoading ? 'border-purple-300' : 'border-gray-200 hover:border-gray-300'}`}>
                     <Mic size={18} className="text-gray-400 flex-shrink-0"/>
@@ -1012,7 +1011,6 @@ export default function BuilderPage() {
               </div>
             </main>
 
-            {/* ── RIGHT SIDEBAR ── */}
             <RightSidebar
               question={selectedQuestion}
               onChange={handleUpdateSelected}
@@ -1029,6 +1027,9 @@ export default function BuilderPage() {
                 onNodeClick={(id) => setSelectedId(id)}
                 onPaneClick={() => setSelectedId(null)}
                 onLogicClick={(id) => setLogicModalOpenFor(id)}
+                onInsertQuestion={(index) => handleAddElement('short_text', index)}
+                onDeleteQuestion={handleDeleteQuestion}
+                onPushQuestion={() => handleAddElement('short_text', questions.length)}
               />
             </div>
             {selectedQuestion && (
@@ -1039,16 +1040,6 @@ export default function BuilderPage() {
                 />
               </div>
             )}
-          </div>
-        )}
-
-        {mainTab === 'connect' && (
-          <div className="flex-1 w-full h-full flex flex-col items-center justify-center bg-gray-50 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Connect to other apps</h2>
-            <p className="text-gray-500 mb-6">Send your form responses directly to Google Sheets, Notion, or Slack.</p>
-            <div className="p-8 border-2 border-dashed border-gray-300 rounded-xl max-w-md w-full text-center">
-              <span className="text-gray-400">Available on higher plans</span>
-            </div>
           </div>
         )}
 
@@ -1072,10 +1063,6 @@ export default function BuilderPage() {
           isOpen={!!logicModalOpenFor}
           onClose={() => setLogicModalOpenFor(null)}
           question={questions.find(q => q.id === logicModalOpenFor)!}
-          onDeleteNode={(id) => {
-            handleDeleteQuestion(id);
-            setLogicModalOpenFor(null);
-          }}
           index={questions.findIndex(q => q.id === logicModalOpenFor)}
         />
       )}

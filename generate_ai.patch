@@ -1,0 +1,34 @@
+--- frontend/src/app/builder/[id]/page.tsx
++++ frontend/src/app/builder/[id]/page.tsx
+@@ -700,16 +700,21 @@
+   };
+ 
+   const handleGenerateWithAI = async (prompt: string) => {
+-    const { generateFormWithAI: gen } = await import('../../../lib/openrouter');
+-    const generated = await gen(prompt);
+-    const created: Question[] = [];
+-    for (let i = 0; i < generated.questions.length; i++) {
+-      const q = await createQuestion(params.id, { ...generated.questions[i], order_index: questions.length + i });
+-      created.push(q);
+-    }
+-    setQuestions(prev => [...prev, ...created]);
+-    if (created.length > 0) setSelectedId(created[0].id);
+-    showToast(`✓ Added ${created.length} questions from AI`);
++    try {
++      const { generateFormWithAI: gen } = await import('../../../lib/openrouter');
++      const generated = await gen(prompt);
++      const created: Question[] = [];
++      for (let i = 0; i < generated.questions.length; i++) {
++        const q = await createQuestion(params.id, { ...generated.questions[i], order_index: questions.length + i });
++        created.push(q);
++      }
++      setQuestions(prev => [...prev, ...created]);
++      if (created.length > 0) setSelectedId(created[0].id);
++      showToast(`✓ Added ${created.length} questions from AI`);
++    } catch (err: unknown) {
++      const msg = err instanceof Error ? err.message : String(err);
++      showToast(`✕ Failed to generate questions: ${msg}`);
++    }
+   };
+ 
+   const handleDeleteQuestion = async (id: number, e: React.MouseEvent) => {

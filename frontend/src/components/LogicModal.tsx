@@ -1,18 +1,19 @@
 'use client';
 
-import React from 'react';
-import { Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Trash2, Plus } from 'lucide-react';
 import { Question } from '@/lib/api';
 
 interface LogicModalProps {
   isOpen: boolean;
   onClose: () => void;
   question: Question;
-  onDeleteNode: (id: number) => void;
   index: number;
 }
 
-export default function LogicModal({ isOpen, onClose, question, onDeleteNode, index }: LogicModalProps) {
+export default function LogicModal({ isOpen, onClose, question, index }: LogicModalProps) {
+  const [rules, setRules] = useState<any[]>([]);
+
   if (!isOpen) return null;
 
   return (
@@ -47,6 +48,22 @@ export default function LogicModal({ isOpen, onClose, question, onDeleteNode, in
               <span className="font-medium text-gray-800">{question.title || 'Untitled'}</span>
             </div>
 
+            <div className="space-y-4 mb-4">
+              {rules.map((_, i) => (
+                <div key={i} className="flex items-center gap-4 bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+                  <span className="text-sm font-medium text-gray-700 w-16">If</span>
+                  <select className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none focus:border-gray-500 bg-white">
+                    <option>Answer is...</option>
+                  </select>
+                  <span className="text-sm font-medium text-gray-700">then go to</span>
+                  <select className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none focus:border-gray-500 bg-white">
+                    <option>Next question</option>
+                  </select>
+                  <button onClick={() => setRules(rules.filter((_, idx) => idx !== i))} className="text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={16}/></button>
+                </div>
+              ))}
+            </div>
+
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium text-gray-700 w-24">Always go to</span>
               <select className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none focus:border-gray-500 bg-white">
@@ -54,8 +71,8 @@ export default function LogicModal({ isOpen, onClose, question, onDeleteNode, in
               </select>
             </div>
 
-            <button className="text-gray-500 text-sm font-medium mt-4 flex items-center gap-1 hover:text-gray-900 transition-colors">
-              <span className="text-lg">+</span> Add rule
+            <button onClick={() => setRules([...rules, {}])} className="text-gray-500 text-sm font-medium mt-4 flex items-center gap-1 hover:text-gray-900 transition-colors">
+              <Plus size={16} /> Add rule
             </button>
           </div>
         </div>
@@ -63,11 +80,9 @@ export default function LogicModal({ isOpen, onClose, question, onDeleteNode, in
         {/* Footer */}
         <div className="flex items-center justify-between p-6 border-t border-gray-100">
           <button 
-            onClick={() => {
-              onDeleteNode(question.id);
-              onClose();
-            }}
-            className="flex items-center gap-2 text-red-500 hover:text-red-700 text-sm font-medium transition-colors"
+            onClick={() => setRules([])}
+            className="flex items-center gap-2 text-red-500 hover:text-red-700 text-sm font-medium transition-colors disabled:opacity-50"
+            disabled={rules.length === 0}
           >
             <Trash2 size={16} /> Delete all rules
           </button>
