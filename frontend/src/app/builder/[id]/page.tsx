@@ -491,6 +491,15 @@ function RightSidebar({ question, onChange }: {
         </div>
 
         <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Question Title</label>
+          <input
+            type="text"
+            value={question.title || ''}
+            onChange={e => onChange({ title: e.target.value })}
+            placeholder="Type your question here..."
+            className="w-full border border-gray-200 rounded-md p-2.5 text-sm outline-none focus:border-blue-400 transition-colors mb-5"
+          />
+
           <label className="block text-sm font-medium text-gray-700 mb-2">Description / help text</label>
           <textarea
             value={question.description || ''}
