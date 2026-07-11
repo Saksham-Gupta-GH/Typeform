@@ -360,11 +360,13 @@ export default function RespondentFlow() {
   const submitForm = async () => {
     if (!form) return;
     try {
-      const formatted = Object.entries(answers).map(([qId, val]) => ({
-        question_id: parseInt(qId),
-        value: val,
-      }));
-      await submitResponse(params.shareToken, formatted);
+      if (!isPreview) {
+        const formatted = Object.entries(answers).map(([qId, val]) => ({
+          question_id: parseInt(qId),
+          value: val,
+        }));
+        await submitResponse(params.shareToken, formatted);
+      }
       setPhase('submitted');
     } catch {
       setValidationError('Failed to submit. Please try again.');
