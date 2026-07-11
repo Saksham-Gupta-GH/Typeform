@@ -10,7 +10,7 @@ router = APIRouter(
     tags=["forms"],
 )
 
-@router.post("/", response_model=schemas.Form)
+@router.post("", response_model=schemas.Form)
 def create_form(form: schemas.FormCreate, db: Session = Depends(get_db)):
     db_form = models.Form(**form.model_dump())
     db.add(db_form)
@@ -20,7 +20,7 @@ def create_form(form: schemas.FormCreate, db: Session = Depends(get_db)):
     return db_form
 
 
-@router.get("/", response_model=List[schemas.Form])
+@router.get("", response_model=List[schemas.Form])
 def read_forms(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     forms = db.query(models.Form).offset(skip).limit(limit).all()
     for form in forms:

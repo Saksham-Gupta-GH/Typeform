@@ -14,7 +14,7 @@ def get_form_questions(form_id: int, db: Session = Depends(get_db)):
     questions = db.query(models.Question).filter(models.Question.form_id == form_id).order_by(models.Question.order_index).all()
     return questions
 
-@router.post("/", response_model=schemas.Question)
+@router.post("", response_model=schemas.Question)
 def create_question(question: schemas.QuestionCreate, db: Session = Depends(get_db)):
     db_question = models.Question(**question.model_dump())
     db.add(db_question)

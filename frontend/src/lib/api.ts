@@ -34,13 +34,13 @@ export interface FormSubmission {
 }
 
 export async function fetchForms(): Promise<Form[]> {
-  const res = await fetch(`${API_BASE_URL}/forms/`);
+  const res = await fetch(`${API_BASE_URL}/forms`);
   if (!res.ok) throw new Error('Failed to fetch forms');
   return res.json();
 }
 
 export async function createForm(data: { title: string; description?: string }): Promise<Form> {
-  const res = await fetch(`${API_BASE_URL}/forms/`, {
+  const res = await fetch(`${API_BASE_URL}/forms`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),

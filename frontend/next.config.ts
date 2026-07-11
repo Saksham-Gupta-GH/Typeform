@@ -16,7 +16,6 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  trailingSlash: true,
   // Enable SWR revalidation for better caching
   headers: async () => [
     {
