@@ -2,6 +2,8 @@
 
 A full-stack Typeform clone built with Next.js, FastAPI, and SQLite. This project allows users to create highly customized, interactive forms with a drag-and-drop builder, and provides a polished, animated one-question-at-a-time filling experience for respondents.
 
+**Live Demo:** [https://typeform-ivory.vercel.app](https://typeform-ivory.vercel.app)
+
 ## Tech Stack Used
 - **Frontend**: Next.js 14 (App Router), React, TypeScript, TailwindCSS, Framer Motion, @dnd-kit (for drag and drop), lucide-react (for icons).
 - **Backend**: Python 3, FastAPI, SQLAlchemy (ORM), Pydantic.
@@ -19,9 +21,9 @@ The application is split into two distinct tiers:
 2. **Backend (Python, FastAPI, SQLAlchemy)**
    - A RESTful JSON API that handles all business logic.
    - Uses Pydantic for strict request/response validation.
-   - Designed for easy deployment to WSGI/ASGI platforms like PythonAnywhere.
+   - Hosted on an Azure Virtual Machine.
 3. **Database (SQLite)**
-   - A single local file (`typeform.db`) that guarantees persistent storage for forms, questions, and responses without the need for a complex cloud database.
+   - A single local file (`typeform_clone.db`) that guarantees persistent storage for forms, questions, and responses without the need for a complex cloud database.
 
 ## Database Schema
 
@@ -78,3 +80,33 @@ Given the constraints of using SQLite (which requires a persistent filesystem), 
 2. **Simplified Creator Auth**: Creator authentication is simplified/assumed to be a default logged-in creator, so there is no complex login/signup flow for the workspace admin.
 3. **No 'Useless' UI Elements**: Based on explicit requirements, non-functional placeholder buttons (like "Webhooks", "Integrations", "Logic Jumps") were intentionally omitted to maintain a clean, fully-functional UI without misleading the user.
 4. **Local/VM Deployment**: The app uses SQLite for ease of setup and local/VM deployments. Standard serverless functions (like AWS Lambda or Vercel Serverless) are not ideal for the backend due to SQLite's need for a persistent file system, hence the Azure VM setup.
+
+## API Overview
+
+The FastAPI backend exposes the following key endpoints:
+
+### Authentication
+- `POST /auth/signup`: Create a new user account.
+- `POST /auth/signin`: Authenticate and receive a JWT token.
+- `GET /auth/verify`: Verify a JWT token's validity.
+
+### Forms
+- `GET /forms`: List all forms for the authenticated user.
+- `POST /forms`: Create a new form.
+- `GET /forms/{id}`: Retrieve a specific form.
+- `PATCH /forms/{id}`: Update a form's metadata (e.g., title).
+- `DELETE /forms/{id}`: Delete a form.
+- `POST /forms/{id}/duplicate`: Duplicate an existing form.
+- `POST /forms/{id}/publish`: Mark a form as published.
+- `GET /forms/public/{share_token}`: Retrieve a published form for respondents (no auth required).
+
+### Questions
+- `GET /questions/form/{form_id}`: Get all questions for a specific form.
+- `POST /questions`: Add a new question to a form.
+- `PATCH /questions/{id}`: Update a question's content or settings.
+- `DELETE /questions/{id}`: Remove a question.
+- `POST /questions/reorder`: Reorder questions via drag-and-drop.
+
+### Responses
+- `GET /forms/{id}/responses`: Fetch all responses and answers for a specific form.
+- `POST /forms/public/{share_token}/responses`: Submit a new response (no auth required).
