@@ -56,7 +56,7 @@ function getAuthHeaders(includeContentType = true): Record<string, string> {
 }
 
 export async function fetchForms(): Promise<Form[]> {
-  const res = await fetch(`${API_BASE_URL}/forms`, { headers: getAuthHeaders(false) });
+  const res = await fetch(`${API_BASE_URL}/forms`, { headers: getAuthHeaders(false), cache: 'no-store' });
   if (!res.ok) {
     console.error('Fetch forms error:', res.status);
     throw new Error(`Failed to fetch forms`);
@@ -126,7 +126,10 @@ export async function duplicateForm(formId: number): Promise<Form> {
 }
 
 export async function fetchQuestions(formId: string): Promise<Question[]> {
-  const res = await fetch(`${API_BASE_URL}/questions/form/${formId}`);
+  const res = await fetch(`${API_BASE_URL}/questions/form/${formId}`, { 
+    headers: getAuthHeaders(false),
+    cache: 'no-store' 
+  });
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
     const errorMsg = errorData.detail || `HTTP ${res.status}`;
@@ -208,13 +211,13 @@ export async function submitResponse(shareToken: string, answers: { question_id:
 }
 
 export async function fetchPublicForm(shareToken: string) {
-  const res = await fetch(`${API_BASE_URL}/forms/public/${shareToken}`);
+  const res = await fetch(`${API_BASE_URL}/forms/public/${shareToken}`, { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to fetch public form');
   return res.json();
 }
 
 export async function fetchResponses(formId: string) {
-  const res = await fetch(`${API_BASE_URL}/forms/${formId}/responses`, { headers: getAuthHeaders(false) });
+  const res = await fetch(`${API_BASE_URL}/forms/${formId}/responses`, { headers: getAuthHeaders(false), cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to fetch responses');
   return res.json();
 }
