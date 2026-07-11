@@ -6,7 +6,7 @@ import { signOut, verifyToken } from '@/lib/api';
 import { usePathname } from 'next/navigation';
 import AuthModal from './AuthModal';
 
-export default function AuthHeader() {
+export default function AuthHeader({ hideButton = false }: { hideButton?: boolean } = {}) {
   const [user, setUser] = useState<{ name: string; email: string; token: string } | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -90,34 +90,36 @@ export default function AuthHeader() {
         onSignIn={handleSignIn}
       />
 
-      <div className="flex items-center gap-3">
-        {user ? (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg shadow-sm">
-            <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-sm font-bold text-blue-600">
-              {user.name.charAt(0).toUpperCase()}
+      {!hideButton && (
+        <div className="flex items-center gap-3">
+          {user ? (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg shadow-sm">
+              <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-sm font-bold text-blue-600">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex flex-col hidden sm:flex">
+                <span className="text-xs font-medium text-gray-900 leading-tight">{user.name}</span>
+                <span className="text-[10px] text-gray-500 leading-tight">{user.email}</span>
+              </div>
+              <button
+                onClick={handleSignOut}
+                className="ml-1 p-1 hover:bg-gray-100 rounded transition-colors text-gray-500 hover:text-red-600 flex items-center justify-center"
+                title="Sign out"
+              >
+                <LogOut size={16} />
+              </button>
             </div>
-            <div className="flex flex-col hidden sm:flex">
-              <span className="text-xs font-medium text-gray-900 leading-tight">{user.name}</span>
-              <span className="text-[10px] text-gray-500 leading-tight">{user.email}</span>
-            </div>
-            <button
-              onClick={handleSignOut}
-              className="ml-1 p-1 hover:bg-gray-100 rounded transition-colors text-gray-500 hover:text-red-600 flex items-center justify-center"
-              title="Sign out"
-            >
-              <LogOut size={16} />
-            </button>
-          </div>
-        ) : (
-            <button
-              onClick={() => setShowAuthModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg transition-colors shadow-sm text-sm"
-            >
-              <User size={16} />
-              Sign In
-            </button>
-        )}
-      </div>
+          ) : (
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg transition-colors shadow-sm text-sm"
+              >
+                <User size={16} />
+                Sign In
+              </button>
+          )}
+        </div>
+      )}
     </>
   );
 }

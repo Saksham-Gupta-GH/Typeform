@@ -196,6 +196,9 @@ export default function WorkspaceDashboard() {
             Get started—it's free
           </button>
         </main>
+        
+        {/* Render Auth Modal invisibly to listen to events */}
+        <AuthHeader hideButton={true} />
       </div>
     );
   }
