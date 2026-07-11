@@ -1019,8 +1019,23 @@ export default function BuilderPage() {
         )}
 
         {mainTab === 'workflow' && (
-          <div className="flex-1 w-full h-full">
-            <WorkflowCanvas questions={questions} />
+          <div className="flex-1 w-full h-full flex">
+            <div className="flex-1 w-full h-full relative">
+              <WorkflowCanvas 
+                questions={questions} 
+                selectedId={selectedId}
+                onNodeClick={(id) => setSelectedId(id)}
+                onPaneClick={() => setSelectedId(null)}
+              />
+            </div>
+            {selectedQuestion && (
+              <div className="border-l border-gray-200">
+                <RightSidebar
+                  question={selectedQuestion}
+                  onChange={handleUpdateSelected}
+                />
+              </div>
+            )}
           </div>
         )}
 
