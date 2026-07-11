@@ -29,19 +29,19 @@ function getApiKey(): string {
   return key;
 }
 
-// Retry logic with exponential backoff
+// Retry logic with exponential backoff - more aggressive for rate limits
 async function fetchWithRetry(
   url: string,
   options: RequestInit,
-  maxRetries: number = 3,
-  initialDelayMs: number = 1000
+  maxRetries: number = 5,
+  initialDelayMs: number = 2000
 ): Promise<Response> {
   let lastError: Error | null = null;
   
   for (let i = 0; i < maxRetries; i++) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout per attempt
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
       
       const response = await fetch(url, {
         ...options,
@@ -50,15 +50,16 @@ async function fetchWithRetry(
       
       clearTimeout(timeoutId);
       
-      // Don't retry on client errors except 429
+      // Don't retry on most errors
       if (response.status >= 400 && response.status < 500 && response.status !== 429) {
         return response;
       }
       
-      // Retry on 429 or 5xx
+      // Retry on 429 (rate limit) or 5xx errors
       if (response.status === 429 || response.status >= 500) {
         if (i < maxRetries - 1) {
-          const delayMs = initialDelayMs * Math.pow(2, i); // Exponential backoff
+          const delayMs = initialDelayMs * Math.pow(2, i);
+          console.log(`[AI] Retry ${i + 1}/${maxRetries} after ${delayMs}ms (HTTP ${response.status})`);
           await new Promise(r => setTimeout(r, delayMs));
           continue;
         }
@@ -69,6 +70,7 @@ async function fetchWithRetry(
       lastError = error as Error;
       if (i < maxRetries - 1) {
         const delayMs = initialDelayMs * Math.pow(2, i);
+        console.log(`[AI] Retry ${i + 1}/${maxRetries} after ${delayMs}ms (error: ${(error as Error).message})`);
         await new Promise(r => setTimeout(r, delayMs));
       }
     }

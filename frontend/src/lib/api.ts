@@ -115,23 +115,31 @@ export async function fetchQuestions(formId: string): Promise<Question[]> {
 }
 
 export async function createQuestion(formId: string, questionData: Partial<Question>): Promise<Question> {
+  const payload = { ...questionData, form_id: parseInt(formId) };
+  console.log('[API] Creating question with payload:', JSON.stringify(payload));
+  
   const res = await fetch(`${API_BASE_URL}/questions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...questionData, form_id: parseInt(formId) }),
+    body: JSON.stringify(payload),
   });
+  
   if (!res.ok) {
     try {
       const errorData = await res.json();
+      console.log('[API] Error response:', errorData);
       const errorMsg = typeof errorData.detail === 'string' ? errorData.detail : JSON.stringify(errorData.detail || errorData);
-      console.error('Create question error:', errorMsg, errorData);
+      console.error('Create question error:', errorMsg);
       throw new Error(errorMsg);
     } catch (e) {
-      console.error('Create question error:', res.status, res.statusText);
+      const text = await res.text().catch(() => res.statusText);
+      console.error('Create question failed:', res.status, text);
       throw new Error(`Failed to create question (HTTP ${res.status})`);
     }
   }
-  return res.json();
+  const result = await res.json();
+  console.log('[API] Question created:', result.id);
+  return result;
 }
 
 export async function updateQuestion(questionId: number, questionData: Partial<Question>): Promise<Question> {
@@ -186,5 +194,40 @@ export async function fetchPublicForm(shareToken: string) {
 export async function fetchResponses(formId: string) {
   const res = await fetch(`${API_BASE_URL}/forms/${formId}/responses`);
   if (!res.ok) throw new Error('Failed to fetch responses');
+  return res.json();
+}
+
+// Auth functions
+export async function signIn(name: string, email: string): Promise<{ token: string; name: string; email: string }> {
+  const res = await fetch(`${API_BASE_URL}/auth/signin`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email }),
+  });
+  
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    const errorMsg = typeof errorData.detail === 'string' ? errorData.detail : 'Sign in failed';
+    throw new Error(errorMsg);
+  }
+  
+  return res.json();
+}
+
+export async function signOut(token: string): Promise<{ message: string }> {
+  const res = await fetch(`${API_BASE_URL}/auth/signout`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token }),
+  });
+  
+  if (!res.ok) throw new Error('Sign out failed');
+  return res.json();
+}
+
+export async function verifyToken(token: string): Promise<{ name: string; email: string }> {
+  const res = await fetch(`${API_BASE_URL}/auth/verify?token=${encodeURIComponent(token)}`);
+  
+  if (!res.ok) throw new Error('Token verification failed');
   return res.json();
 }

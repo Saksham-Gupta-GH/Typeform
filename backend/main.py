@@ -34,18 +34,23 @@ logger.info("FastAPI app initialized")
 @app.exception_handler(RequestValidationError)
 def validation_exception_handler(request, exc):
     errors = exc.errors()
-    logger.error(f"Validation error: {errors}")
-    # Extract first error message for user
-    error_msg = "Invalid request"
-    if errors:
-        first_error = errors[0]
-        if isinstance(first_error.get('msg'), str):
-            error_msg = first_error['msg']
-        elif isinstance(first_error.get('type'), str):
-            error_msg = f"Invalid {first_error.get('type')}"
+    logger.error(f"Validation error on {request.url.path}: {errors}")
+    
+    # Build user-friendly error message
+    error_details = []
+    for error in errors:
+        field = '.'.join(str(x) for x in error.get('loc', []))
+        msg = error.get('msg', 'validation failed')
+        error_details.append(f"{field}: {msg}")
+    
+    error_msg = "; ".join(error_details) if error_details else "Invalid request"
+    
     return JSONResponse(
         status_code=422,
-        content={"detail": error_msg, "errors": errors},
+        content={
+            "detail": error_msg,
+            "errors": errors
+        },
     )
 
 # Configure CORS
@@ -71,11 +76,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from routers import forms, questions, responses
+from routers import forms, questions, responses, auth
 
 app.include_router(forms.router)
 app.include_router(questions.router)
 app.include_router(responses.router)
+app.include_router(auth.router)
 
 @app.get("/")
 def read_root():

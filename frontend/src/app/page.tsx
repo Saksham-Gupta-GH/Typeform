@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, LayoutGrid, Users, Zap, MoreHorizontal, Diamond, HelpCircle, MessageSquare, Calendar, LayoutList, Mic, Send, X, ChevronDown, ChevronUp, FileText, Trash2, Copy, Edit3, Link, Move, ExternalLink } from 'lucide-react';
-import { fetchForms, createForm, deleteForm, duplicateForm, updateForm, Form } from '@/lib/api';
+import { fetchForms, createForm, deleteForm, duplicateForm, updateForm, Form, signIn, signOut, verifyToken } from '@/lib/api';
 import { generateFormWithAI } from '@/lib/openrouter';
 
 type ContextMenu = {
@@ -29,20 +29,32 @@ export default function WorkspaceDashboard() {
   const [aiInput, setAiInput] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSidebarOpen, setAiSidebarOpen] = useState(false);
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [user, setUser] = useState<{ name: string; email: string; token?: string } | null>(null);
   const [showSignIn, setShowSignIn] = useState(false);
   const [signInName, setSignInName] = useState('');
   const [signInEmail, setSignInEmail] = useState('');
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Load user from localStorage
+    // Load user from localStorage and verify token
     const saved = localStorage.getItem('typeform_user');
     if (saved) {
       try {
-        setUser(JSON.parse(saved));
+        const userData = JSON.parse(saved);
+        if (userData.token) {
+          // Verify token with backend
+          verifyToken(userData.token)
+            .then((response) => {
+              setUser({ name: response.name, email: response.email, token: userData.token });
+            })
+            .catch((err) => {
+              console.error('Token verification failed:', err);
+              localStorage.removeItem('typeform_user');
+            });
+        }
       } catch (e) {
         console.error('Failed to load user');
+        localStorage.removeItem('typeform_user');
       }
     }
     loadForms();
@@ -160,21 +172,48 @@ export default function WorkspaceDashboard() {
       addToast('Please enter name and email', 'error');
       return;
     }
-    const userData = { name: signInName.trim(), email: signInEmail.trim() };
-    setUser(userData);
-    localStorage.setItem('typeform_user', JSON.stringify(userData));
-    setShowSignIn(false);
-    setSignInName('');
-    setSignInEmail('');
-    addToast(`Welcome, ${userData.name}!`);
+    
+    // Call backend to sign in
+    signIn(signInName.trim(), signInEmail.trim())
+      .then((response) => {
+        setUser({ name: response.name, email: response.email, token: response.token });
+        localStorage.setItem('typeform_user', JSON.stringify({ name: response.name, email: response.email, token: response.token }));
+        setShowSignIn(false);
+        setSignInName('');
+        setSignInEmail('');
+        addToast(`Welcome, ${response.name}!`);
+      })
+      .catch((err) => {
+        const msg = err instanceof Error ? err.message : 'Sign in failed';
+        addToast(`Sign in failed: ${msg}`, 'error');
+      });
   }
 
   function handleSignOut() {
-    setUser(null);
-    localStorage.removeItem('typeform_user');
-    setSignInName('');
-    setSignInEmail('');
-    addToast('Signed out successfully');
+    if (!user || !user.token) {
+      setUser(null);
+      localStorage.removeItem('typeform_user');
+      setSignInName('');
+      setSignInEmail('');
+      addToast('Signed out successfully');
+      return;
+    }
+    
+    signOut(user.token)
+      .then(() => {
+        setUser(null);
+        localStorage.removeItem('typeform_user');
+        setSignInName('');
+        setSignInEmail('');
+        addToast('Signed out successfully');
+      })
+      .catch((err) => {
+        console.error('Sign out error:', err);
+        // Still sign out locally even if backend fails
+        setUser(null);
+        localStorage.removeItem('typeform_user');
+        addToast('Signed out');
+      });
   }
 
   return (
