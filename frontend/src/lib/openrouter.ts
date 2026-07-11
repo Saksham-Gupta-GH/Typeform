@@ -29,6 +29,54 @@ function getApiKey(): string {
   return key;
 }
 
+// Retry logic with exponential backoff
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  maxRetries: number = 3,
+  initialDelayMs: number = 1000
+): Promise<Response> {
+  let lastError: Error | null = null;
+  
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout per attempt
+      
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      // Don't retry on client errors except 429
+      if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+        return response;
+      }
+      
+      // Retry on 429 or 5xx
+      if (response.status === 429 || response.status >= 500) {
+        if (i < maxRetries - 1) {
+          const delayMs = initialDelayMs * Math.pow(2, i); // Exponential backoff
+          await new Promise(r => setTimeout(r, delayMs));
+          continue;
+        }
+      }
+      
+      return response;
+    } catch (error) {
+      lastError = error as Error;
+      if (i < maxRetries - 1) {
+        const delayMs = initialDelayMs * Math.pow(2, i);
+        await new Promise(r => setTimeout(r, delayMs));
+      }
+    }
+  }
+  
+  throw lastError || new Error('Max retries exceeded');
+}
+
 export async function generateFormWithAI(prompt: string): Promise<GeneratedForm> {
   const apiKey = getApiKey();
   
@@ -71,10 +119,7 @@ Rules:
   }
 
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout
-
-    const response = await fetch(OPENROUTER_API_URL, {
+    const response = await fetchWithRetry(OPENROUTER_API_URL, {
       method: 'POST',
       headers,
       body: JSON.stringify({
@@ -84,20 +129,17 @@ Rules:
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
-        max_tokens: 1500,
+        max_tokens: 1200,
       }),
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
+    }, 3, 1500);
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => response.statusText);
       if (response.status === 429) {
-        throw new Error('API rate limit exceeded. Please try again in a few seconds.');
+        throw new Error('API is overloaded. Please wait a minute and try again.');
       }
       if (response.status >= 500) {
-        throw new Error('AI service is temporarily unavailable. Please try again shortly.');
+        throw new Error('AI service temporarily unavailable. Try again in a minute.');
       }
       throw new Error(`API error: ${response.status}`);
     }
@@ -126,7 +168,7 @@ Rules:
     }
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error('Request timed out. Please try again.');
+      throw new Error('Request timed out. The AI service is busy. Try again shortly.');
     }
     throw error;
   }
