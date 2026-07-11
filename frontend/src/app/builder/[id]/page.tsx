@@ -962,7 +962,7 @@ export default function BuilderPage() {
                 </div>
                 <div className="flex items-center gap-3 text-gray-500">
                   <button
-                    onClick={() => shareToken && router.push(`/form/${shareToken}?preview=1`)}
+                    onClick={async () => { await handleShareOrPublish(); shareToken && router.push(`/form/${shareToken}?preview=1`); }}
                     className="flex items-center gap-1.5 text-sm font-medium text-gray-700 p-1.5 hover:bg-gray-100 rounded-md transition-colors" title="Preview"
                   >
                     <Play size={16}/> Preview
