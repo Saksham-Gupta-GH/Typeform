@@ -33,11 +33,19 @@ logger.info("FastAPI app initialized")
 # Custom exception handler for validation errors
 @app.exception_handler(RequestValidationError)
 def validation_exception_handler(request, exc):
-    logger.error(f"Validation error: {exc.errors()}")
-    logger.error(f"Request headers: {dict(request.headers)}")
+    errors = exc.errors()
+    logger.error(f"Validation error: {errors}")
+    # Extract first error message for user
+    error_msg = "Invalid request"
+    if errors:
+        first_error = errors[0]
+        if isinstance(first_error.get('msg'), str):
+            error_msg = first_error['msg']
+        elif isinstance(first_error.get('type'), str):
+            error_msg = f"Invalid {first_error.get('type')}"
     return JSONResponse(
         status_code=422,
-        content={"detail": exc.errors()},
+        content={"detail": error_msg, "errors": errors},
     )
 
 # Configure CORS

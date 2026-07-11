@@ -35,7 +35,10 @@ export interface FormSubmission {
 
 export async function fetchForms(): Promise<Form[]> {
   const res = await fetch(`${API_BASE_URL}/forms`);
-  if (!res.ok) throw new Error('Failed to fetch forms');
+  if (!res.ok) {
+    console.error('Fetch forms error:', res.status);
+    throw new Error(`Failed to fetch forms`);
+  }
   return res.json();
 }
 
@@ -46,10 +49,15 @@ export async function createForm(data: { title: string; description?: string }):
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    const errorMsg = errorData.detail || `HTTP ${res.status}`;
-    console.error('Create form error:', errorMsg, errorData);
-    throw new Error(`Failed to create form: ${errorMsg}`);
+    try {
+      const errorData = await res.json();
+      const errorMsg = typeof errorData.detail === 'string' ? errorData.detail : JSON.stringify(errorData.detail || errorData);
+      console.error('Create form error:', errorMsg);
+      throw new Error(errorMsg);
+    } catch (e) {
+      console.error('Create form error:', res.status);
+      throw new Error(`Failed to create form (HTTP ${res.status})`);
+    }
   }
   return res.json();
 }
@@ -113,10 +121,15 @@ export async function createQuestion(formId: string, questionData: Partial<Quest
     body: JSON.stringify({ ...questionData, form_id: parseInt(formId) }),
   });
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    const errorMsg = errorData.detail || `HTTP ${res.status}`;
-    console.error('Create question error:', errorMsg, errorData);
-    throw new Error(`Failed to create question: ${errorMsg}`);
+    try {
+      const errorData = await res.json();
+      const errorMsg = typeof errorData.detail === 'string' ? errorData.detail : JSON.stringify(errorData.detail || errorData);
+      console.error('Create question error:', errorMsg, errorData);
+      throw new Error(errorMsg);
+    } catch (e) {
+      console.error('Create question error:', res.status, res.statusText);
+      throw new Error(`Failed to create question (HTTP ${res.status})`);
+    }
   }
   return res.json();
 }

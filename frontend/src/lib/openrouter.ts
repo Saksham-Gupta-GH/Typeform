@@ -80,6 +80,8 @@ async function fetchWithRetry(
 export async function generateFormWithAI(prompt: string): Promise<GeneratedForm> {
   const apiKey = getApiKey();
   
+  console.log('[AI] Starting form generation with prompt:', prompt.substring(0, 50) + '...');
+  
   const systemPrompt = `You are a form-building assistant. Given a description of a form, generate a structured form with questions.
 
 Return ONLY valid JSON matching this exact schema (no markdown, no explanation):
@@ -88,7 +90,7 @@ Return ONLY valid JSON matching this exact schema (no markdown, no explanation):
   "description": "string",
   "questions": [
     {
-      "type": "short_text|long_text|multiple_choice|dropdown|email|number|yes_no|rating",
+      "type": "short_text|long_text|multiple_choice|dropdown|email|number|yes_no|rating|date|statement|phone_number",
       "title": "string",
       "description": "optional string",
       "is_required": true|false,
@@ -116,9 +118,13 @@ Rules:
 
   if (apiKey) {
     headers['Authorization'] = `Bearer ${apiKey}`;
+    console.log('[AI] Using provided API key');
+  } else {
+    console.log('[AI] Using OpenRouter free tier (no API key)');
   }
 
   try {
+    console.log('[AI] Sending request to OpenRouter...');
     const response = await fetchWithRetry(OPENROUTER_API_URL, {
       method: 'POST',
       headers,
@@ -133,43 +139,52 @@ Rules:
       }),
     }, 3, 1500);
 
+    console.log('[AI] Response status:', response.status);
+
     if (!response.ok) {
       const errorText = await response.text().catch(() => response.statusText);
+      console.error('[AI] API error response:', response.status, errorText.substring(0, 200));
+      
       if (response.status === 429) {
-        throw new Error('API is overloaded. Please wait a minute and try again.');
+        throw new Error('OpenRouter rate limit exceeded. Please wait a minute and try again.');
       }
       if (response.status >= 500) {
-        throw new Error('AI service temporarily unavailable. Try again in a minute.');
+        throw new Error('OpenRouter service error. Try again in a few seconds.');
       }
-      throw new Error(`API error: ${response.status}`);
+      throw new Error(`OpenRouter error (${response.status})`);
     }
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content;
     
     if (!content) {
-      throw new Error('No response from AI service');
+      console.error('[AI] No content in response:', data);
+      throw new Error('AI returned empty response');
     }
 
-    // Strip markdown code blocks if present
+    console.log('[AI] Parsing response (length:', content.length + ')...');
     const cleanContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     
     try {
       const parsed = JSON.parse(cleanContent);
       
-      // Validate the response structure
       if (!parsed.questions || !Array.isArray(parsed.questions)) {
-        throw new Error('Invalid response format');
+        console.error('[AI] Invalid structure:', parsed);
+        throw new Error('Invalid response structure');
       }
 
+      console.log('[AI] Success! Generated', parsed.questions.length, 'questions');
       return parsed as GeneratedForm;
-    } catch {
-      throw new Error('Invalid AI response format');
+    } catch (parseErr) {
+      console.error('[AI] Parse error:', parseErr, 'Content:', cleanContent.substring(0, 300));
+      throw new Error('Failed to parse AI response');
     }
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error('Request timed out. The AI service is busy. Try again shortly.');
+      console.error('[AI] Request timeout after 25 seconds');
+      throw new Error('AI request timed out. Service is busy, please try again.');
     }
+    console.error('[AI] Error:', error instanceof Error ? error.message : String(error));
     throw error;
   }
 }

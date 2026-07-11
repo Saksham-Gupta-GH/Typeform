@@ -681,10 +681,9 @@ export default function BuilderPage({ params }: { params: { id: string } }) {
       setSelectedId(newQ.id);
       showToast(`✓ Added ${TYPE_META[type]?.label || 'question'}`);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to add question';
-      console.error('Error in handleAddElement:', msg);
-      showToast(`✕ ${msg}`);
-      throw err;
+      const msg = err instanceof Error ? err.message : JSON.stringify(err);
+      console.error('Error in handleAddElement:', err);
+      showToast(`✕ Failed to create question: ${msg}`);
     }
   };
 
