@@ -579,12 +579,6 @@ function RightSidebar({ question, onChange, isWelcome }: {
             )}
           </>
         )}
-      </div>
-
-      <div className="p-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between text-sm font-medium text-gray-600 cursor-pointer hover:bg-gray-100 transition-colors">
-        <span>Comments</span>
-        <Diamond size={14} className="text-teal-600"/>
-      </div>
     </aside>
   );
 }
@@ -825,13 +819,7 @@ export default function BuilderPage({ params }: { params: { id: string } }) {
       <div className="flex w-full h-full pt-14">
         {/* ── LEFT SIDEBAR ── */}
             <aside className="w-[272px] bg-[#f9f9f9] border-r border-gray-200 flex flex-col flex-shrink-0">
-              {/* Mode selector */}
-              <div className="p-3 border-b border-gray-200">
-                <button className="w-full flex items-center justify-between bg-white border border-gray-200 shadow-sm rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                  <span className="flex items-center gap-2"><LayoutList size={15}/> Universal mode</span>
-                  <ChevronDown size={14} className="text-gray-400"/>
-                </button>
-              </div>
+              {/* Removed Universal mode selector */}
 
               <div className="flex-1 overflow-y-auto p-3">
                 <h3 className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1">Pages</h3>
@@ -858,27 +846,12 @@ export default function BuilderPage({ params }: { params: { id: string } }) {
 
                     <div className="h-px bg-gray-200 my-3"/>
 
-                    <div className="space-y-1.5">
                       <button
                         onClick={() => setShowAddModal(true)}
                         className="w-full border border-dashed border-gray-300 rounded-lg py-2.5 text-sm font-medium text-gray-500 hover:text-black hover:border-gray-400 transition-all flex items-center justify-center gap-2 bg-white"
                       >
                         <Plus size={15}/> Add question
                       </button>
-                      <div className="border border-purple-200 bg-purple-50/50 rounded-lg p-2.5 cursor-pointer group flex items-center justify-between hover:bg-purple-50 transition-colors">
-                        <div className="flex items-center gap-2">
-                          <Sparkles size={15} className="text-purple-500"/>
-                          <span className="text-sm font-medium text-gray-700 text-sm">Personalize with branching</span>
-                        </div>
-                        <ChevronRight size={14} className="text-gray-400 group-hover:text-black transition-colors"/>
-                      </div>
-                    </div>
-
-                    <div className="mt-5">
-                      <div className="flex justify-between items-center mb-2 px-1">
-                        <h3 className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Endings</h3>
-                        <Plus size={14} className="text-gray-400 cursor-pointer hover:text-black"/>
-                      </div>
                     </div>
                   </>
                 )}
