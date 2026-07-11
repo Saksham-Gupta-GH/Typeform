@@ -878,9 +878,7 @@ export default function BuilderPage() {
           <button className="text-gray-500 hover:text-gray-800 transition-colors p-1.5 rounded hover:bg-gray-100" title="Copy Link">
             <Link2 size={18}/>
           </button>
-          <button className="bg-teal-700 hover:bg-teal-800 text-white text-sm font-medium px-3 py-1.5 rounded transition-colors hidden sm:block">
-            View plans
-          </button>
+
           <AuthHeader />
         </div>
       </header>
@@ -985,13 +983,13 @@ export default function BuilderPage() {
                     onClick={() => setActiveTab('content')}
                     className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium shadow-sm transition-colors ${activeTab === 'content' ? 'bg-gray-900 text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}
                   >
-                    📝 Content
+                    Content
                   </button>
                   <button
                     onClick={() => setActiveTab('design')}
                     className={`flex items-center gap-1.5 text-sm font-medium transition-colors px-3 py-1.5 rounded-md ${activeTab === 'design' ? 'bg-gray-900 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}
                   >
-                    🎨 Design
+                    Design
                   </button>
                 </div>
                 <div className="flex items-center gap-3 text-gray-500">

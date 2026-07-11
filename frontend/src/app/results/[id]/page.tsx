@@ -117,9 +117,7 @@ export default function ResultsDashboard() {
         </div>
         
         <div className="flex items-center justify-end gap-3 w-1/3">
-          <button className="bg-teal-700 hover:bg-teal-800 text-white text-sm font-medium px-3 py-1.5 rounded transition-colors hidden sm:block">
-            View plans
-          </button>
+
           <AuthHeader />
         </div>
       </header>
