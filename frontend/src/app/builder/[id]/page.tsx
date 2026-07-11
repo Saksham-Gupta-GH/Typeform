@@ -211,7 +211,14 @@ function AddContentModal({ onClose, onAddElement, onGenerateWithAI }: AddContent
                     {cat.items.map(item => (
                       <button
                         key={item.type + item.label}
-                        onClick={() => { onAddElement(item.type); onClose(); }}
+                        onClick={async () => { 
+                          try {
+                            await onAddElement(item.type);
+                            onClose();
+                          } catch (err) {
+                            console.error('Failed to add element:', err);
+                          }
+                        }}
                         className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 text-left transition-colors border border-transparent hover:border-gray-200"
                       >
                         <TypeIcon type={item.type} />
@@ -671,8 +678,10 @@ export default function BuilderPage({ params }: { params: { id: string } }) {
       const newQ = await createQuestion(params.id, defaults);
       setQuestions(prev => [...prev, newQ]);
       setSelectedId(newQ.id);
-    } catch (err) {
-      console.error(err);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to add question';
+      showToast(`✕ ${msg}`);
+      throw err; // Re-throw so modal doesn't close
     }
   };
 
