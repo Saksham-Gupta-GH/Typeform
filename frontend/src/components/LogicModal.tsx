@@ -71,7 +71,7 @@ export default function LogicModal({ isOpen, onClose, question, index }: LogicMo
               </select>
             </div>
 
-            <button onClick={() => setRules([...rules, {}])} className="text-gray-500 text-sm font-medium mt-4 flex items-center gap-1 hover:text-gray-900 transition-colors">
+            <button type="button" onClick={() => setRules([...rules, {}])} className="text-gray-500 text-sm font-medium mt-4 flex items-center gap-1 hover:text-gray-900 transition-colors">
               <Plus size={16} /> Add rule
             </button>
           </div>

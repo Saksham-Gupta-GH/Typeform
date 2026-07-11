@@ -459,6 +459,8 @@ function RightSidebar({ question, onChange }: {
   question: Question | null;
   onChange: (updates: Partial<Question>) => void;
 }) {
+  const [showTypeMenu, setShowTypeMenu] = React.useState(false);
+
   if (!question) {
     return (
       <aside className="w-full md:w-[300px] bg-white border-t md:border-t-0 md:border-l border-gray-200 flex items-center justify-center min-h-[100px] md:min-h-0">
@@ -471,12 +473,35 @@ function RightSidebar({ question, onChange }: {
 
   return (
     <aside className="w-full md:w-[300px] bg-white border-t md:border-t-0 md:border-l border-gray-200 flex flex-col shadow-[-2px_0_8px_rgba(0,0,0,0.03)] min-h-[400px] md:min-h-0">
-      <div className="p-4 border-b border-gray-100">
-        <div className="flex items-center bg-gray-100 rounded-md px-3 py-2 cursor-pointer hover:bg-gray-200 transition-colors">
+      <div className="p-4 border-b border-gray-100 relative">
+        <div 
+          onClick={() => setShowTypeMenu(!showTypeMenu)}
+          className="flex items-center bg-gray-100 rounded-md px-3 py-2 cursor-pointer hover:bg-gray-200 transition-colors"
+        >
           <TypeIcon type={question.type} />
           <span className="ml-2 text-sm font-medium text-gray-700 flex-1 capitalize">{(TYPE_META[question.type]?.label) || question.type}</span>
           <ChevronDown size={14} className="text-gray-500"/>
         </div>
+        
+        {showTypeMenu && (
+          <div className="absolute top-16 left-4 right-4 bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-2 max-h-[300px] overflow-y-auto animate-in fade-in zoom-in duration-200">
+            {Object.entries(TYPE_META).map(([typeKey, meta]) => (
+              <div
+                key={typeKey}
+                onClick={() => {
+                  onChange({ type: typeKey });
+                  setShowTypeMenu(false);
+                }}
+                className={`flex items-center px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors ${question.type === typeKey ? 'bg-gray-50' : ''}`}
+              >
+                <div className="flex items-center justify-center w-6 h-6 rounded mr-3" style={{ backgroundColor: meta.bg, color: meta.color }}>
+                  <span className="text-sm font-bold">{meta.icon}</span>
+                </div>
+                <span className="text-sm text-gray-700 font-medium">{meta.label}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-5 space-y-5">
