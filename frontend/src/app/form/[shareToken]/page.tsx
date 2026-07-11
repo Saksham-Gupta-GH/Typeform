@@ -385,11 +385,11 @@ export default function RespondentFlow() {
   const currentQ = form.questions[currentQIndex];
 
   const slideVariants = {
-    enterDown: { y: 60, opacity: 0 },
-    enterUp: { y: -60, opacity: 0 },
+    enterDown: { y: 15, opacity: 0 },
+    enterUp: { y: -15, opacity: 0 },
     center: { y: 0, opacity: 1 },
-    exitDown: { y: -60, opacity: 0 },
-    exitUp: { y: 60, opacity: 0 },
+    exitDown: { y: -15, opacity: 0 },
+    exitUp: { y: 15, opacity: 0 },
   };
 
   const bgColor = form?.design_settings?.bgColor || '#ffffff';
@@ -422,7 +422,7 @@ export default function RespondentFlow() {
               initial={direction === 'down' ? 'enterDown' : 'enterUp'}
               animate="center"
               exit={direction === 'down' ? 'exitDown' : 'exitUp'}
-              transition={{ duration: 0.35, ease: [0.32, 0, 0.67, 0] }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
               className="absolute inset-0 flex"
             >
               <QuestionView

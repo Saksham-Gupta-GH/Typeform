@@ -813,12 +813,12 @@ export default function BuilderPage() {
       )}
 
       {/* ── Top Navigation ── */}
-      <header className="absolute top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 z-20 flex items-center justify-between px-4">
-        <div className="flex items-center gap-2 w-1/3">
-          <button onClick={() => router.push('/')} className="flex items-center text-sm text-gray-500 hover:text-gray-800 transition-colors">
+      <header className="absolute top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 z-20 flex items-center justify-between px-2 md:px-4">
+        <div className="flex items-center gap-1 md:gap-2">
+          <button onClick={() => router.push('/')} className="hidden md:flex items-center text-sm text-gray-500 hover:text-gray-800 transition-colors">
             <LayoutList size={16} className="mr-1.5"/> Forms
           </button>
-          <ChevronRight size={14} className="text-gray-400"/>
+          <ChevronRight size={14} className="hidden md:block text-gray-400"/>
           <input
             type="text"
             value={formTitle}
@@ -826,17 +826,17 @@ export default function BuilderPage() {
             onBlur={async () => {
               if (formId) await updateForm(formId, { title: formTitle });
             }}
-            className="text-sm font-semibold text-gray-900 outline-none bg-transparent hover:bg-gray-100 px-2 py-1 rounded transition-colors"
+            className="text-sm font-semibold text-gray-900 outline-none bg-transparent hover:bg-gray-100 px-2 py-1 rounded transition-colors w-[120px] md:w-auto"
           />
         </div>
 
-        <div className="flex gap-4 justify-center w-1/3">
+        <div className="hidden md:flex gap-4 justify-center">
           <button className="text-sm font-medium text-gray-900 border-b-2 border-gray-900 px-1 py-4">Create</button>
           <button className="text-sm font-medium text-gray-500 hover:text-gray-900 px-1 py-4 transition-colors">Connect</button>
-          <button className="text-sm font-medium text-gray-500 hover:text-gray-900 px-1 py-4 transition-colors">Results</button>
+          <button onClick={() => router.push(`/results/${formId}`)} className="text-sm font-medium text-gray-500 hover:text-gray-900 px-1 py-4 transition-colors">Results</button>
         </div>
 
-        <div className="flex items-center gap-3 w-1/3 justify-end">
+        <div className="flex items-center gap-2 md:gap-3">
           <button
             onClick={handleShareOrPublish}
             className="text-gray-900 border border-gray-300 rounded-md px-3 py-1.5 text-sm font-medium flex items-center gap-1.5 hover:bg-gray-50 transition-colors"
