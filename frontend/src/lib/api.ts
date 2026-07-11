@@ -25,6 +25,12 @@ export interface Form {
   is_published: boolean;
   created_at: string;
   updated_at: string;
+  design_settings?: {
+    bgColor?: string;
+    textColor?: string;
+    buttonColor?: string;
+    fontFamily?: string;
+  };
 }
 
 export interface FormSubmission {
@@ -62,7 +68,7 @@ export async function createForm(data: { title: string; description?: string }):
   return res.json();
 }
 
-export async function updateForm(formId: number, data: { title?: string; description?: string; is_published?: boolean }): Promise<Form> {
+export async function updateForm(formId: number, data: { title?: string; description?: string; is_published?: boolean; design_settings?: any }): Promise<Form> {
   const res = await fetch(`${API_BASE_URL}/forms/${formId}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },

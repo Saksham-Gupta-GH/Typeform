@@ -131,7 +131,7 @@ Rules:
       method: 'POST',
       headers,
       body: JSON.stringify({
-        model: 'meta-llama/llama-3.2-3b-instruct:free',
+        model: 'openrouter/auto',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: prompt }

@@ -1,0 +1,9 @@
+@@ -334,7 +334,7 @@
+ 
+ // ──────────────────────────────────────────────────────────────
+ // Canvas Preview Components
+-function QuestionPreview({ question, isWelcome }: { question: Question | null; isWelcome?: boolean }) {
++function QuestionPreview({ question, isWelcome, buttonColor }: { question: Question | null; isWelcome?: boolean; buttonColor?: string }) {
+   if (!question) {
+     return (
+       <div className="flex items-center justify-center h-full">

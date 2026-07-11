@@ -1,0 +1,19 @@
+--- frontend/src/app/builder/[id]/page.tsx
++++ frontend/src/app/builder/[id]/page.tsx
+@@ -743,6 +743,15 @@
+     try {
+       await updateForm(params.id, { is_published: false });
+       showToast('Form unpublished successfully');
+     } catch (err) { console.error(err); showToast('Failed to unpublish'); }
+   };
++
++  const handleDesignChange = (key: keyof typeof designSettings, value: string) => {
++    const newSettings = { ...designSettings, [key]: value };
++    setDesignSettings(newSettings);
++    
++    // Debounce API call
++    clearTimeout((window as any).designTimeout);
++    (window as any).designTimeout = setTimeout(() => {
++      updateForm(params.id, { design_settings: newSettings }).catch(console.error);
++    }, 500);
++  };

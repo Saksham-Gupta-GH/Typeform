@@ -11,25 +11,36 @@ export interface FormResponse {
   title: string;
   description?: string;
   questions: Question[];
+  design_settings?: {
+    bgColor?: string;
+    textColor?: string;
+    buttonColor?: string;
+    fontFamily?: string;
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Welcome screen (sc11)
 // ─────────────────────────────────────────────────────────────────────────────
 function WelcomeScreen({ form, onStart }: { form: FormResponse; onStart: () => void }) {
+  const btnColor = form.design_settings?.buttonColor || '#2563eb';
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
-      <h1 className="text-4xl font-semibold text-gray-900 mb-5">{form.title}</h1>
-      {form.description && (
-        <p className="text-lg text-gray-600 mb-10 max-w-lg">{form.description}</p>
-      )}
-      <button
-        onClick={onStart}
-        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-10 rounded text-lg transition-colors shadow-sm"
-        autoFocus
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
       >
-        start
-      </button>
+        <h1 className="text-4xl font-semibold mb-6">{form.title}</h1>
+        {form.description && <p className="text-xl mb-12 max-w-2xl mx-auto opacity-80">{form.description}</p>}
+        <button
+          onClick={onStart}
+          className="text-white font-semibold py-3 px-8 rounded text-lg transition-colors shadow-sm"
+          style={{ backgroundColor: btnColor }}
+        >
+          Start
+        </button>
+      </motion.div>
       <p className="text-gray-400 text-sm mt-3 flex items-center gap-1.5">
         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
@@ -52,9 +63,10 @@ interface QuestionViewProps {
   onNext: () => void;
   validationError: string;
   isLast: boolean;
+  buttonColor?: string;
 }
 
-function QuestionView({ question, index, total, value, onChange, onNext, validationError, isLast }: QuestionViewProps) {
+function QuestionView({ question, index, total, value, onChange, onNext, validationError, isLast, buttonColor }: QuestionViewProps) {
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -70,18 +82,18 @@ function QuestionView({ question, index, total, value, onChange, onNext, validat
       {/* Question number + arrow badge */}
       <div className="flex items-start gap-5 mb-8">
         <div className="flex items-center gap-2 flex-shrink-0 mt-1">
-          <div className="w-7 h-7 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold">
+          <div className="w-7 h-7 rounded flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: buttonColor }}>
             {index + 1}
           </div>
-          <span className="text-blue-600 text-lg font-medium">→</span>
+          <span className="text-lg font-medium opacity-70">→</span>
         </div>
         <div className="flex-1">
-          <h1 className="text-3xl font-semibold text-gray-900 leading-tight">
+          <h1 className="text-3xl font-semibold leading-tight">
             {question.title}
             {question.is_required && <span className="text-red-500 ml-1">*</span>}
           </h1>
           {question.description && (
-            <p className="text-gray-500 mt-2 text-base">{question.description}</p>
+            <p className="mt-2 text-base opacity-70">{question.description}</p>
           )}
         </div>
       </div>
@@ -90,7 +102,7 @@ function QuestionView({ question, index, total, value, onChange, onNext, validat
       <div className="pl-12">
         {/* Short text / email / phone / number */}
         {['short_text', 'email', 'phone_number', 'number'].includes(question.type) && (
-          <div className="border-b-2 border-blue-500 pb-1 mb-6">
+          <div className="border-b-2 border-current pb-1 mb-6 opacity-80">
             <input
               autoFocus
               type={question.type === 'email' ? 'email' : question.type === 'number' ? 'number' : 'text'}
@@ -98,21 +110,21 @@ function QuestionView({ question, index, total, value, onChange, onNext, validat
               value={value ?? ''}
               onChange={e => onChange(e.target.value)}
               onKeyDown={handleKey}
-              className="w-full outline-none text-xl text-gray-800 bg-transparent placeholder-gray-300 py-1"
+              className="w-full outline-none text-xl bg-transparent placeholder-black/20 py-1"
             />
           </div>
         )}
 
         {/* Long text */}
         {question.type === 'long_text' && (
-          <div className="border-b-2 border-blue-500 pb-1 mb-6">
+          <div className="border-b-2 border-current pb-1 mb-6 opacity-80">
             <textarea
               autoFocus
               placeholder="Type your answer here..."
               value={value ?? ''}
               onChange={e => onChange(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && e.metaKey) onNext(); }}
-              className="w-full outline-none text-xl text-gray-800 bg-transparent placeholder-gray-300 resize-none min-h-[80px] py-1"
+              className="w-full outline-none text-xl bg-transparent placeholder-black/20 resize-none min-h-[80px] py-1"
             />
           </div>
         )}
@@ -126,12 +138,12 @@ function QuestionView({ question, index, total, value, onChange, onNext, validat
                 onClick={() => { onChange(opt); }}
                 className={`flex items-center gap-4 px-4 py-3.5 border-2 rounded-xl cursor-pointer transition-all ${
                   value === opt
-                    ? 'border-blue-500 bg-blue-50 text-blue-800'
-                    : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                    ? 'border-current bg-black/5'
+                    : 'border-black/10 hover:border-black/20'
                 }`}
               >
                 <span className={`w-8 h-8 rounded border-2 flex items-center justify-center text-xs font-bold flex-shrink-0 transition-colors ${
-                  value === opt ? 'border-blue-500 bg-blue-500 text-white' : 'border-gray-300 text-gray-500'
+                  value === opt ? 'border-current bg-current text-white' : 'border-black/20'
                 }`}>
                   {String.fromCharCode(65 + i)}
                 </span>
@@ -148,7 +160,7 @@ function QuestionView({ question, index, total, value, onChange, onNext, validat
               autoFocus
               value={String(value ?? '')}
               onChange={e => onChange(e.target.value)}
-              className="w-full border-b-2 border-blue-500 bg-transparent text-xl text-gray-800 outline-none py-2 cursor-pointer appearance-none"
+              className="w-full border-b-2 border-current bg-transparent text-xl outline-none py-2 cursor-pointer appearance-none"
             >
               <option value="" disabled>Select an option...</option>
               {options.map((opt, i) => <option key={i} value={opt}>{opt}</option>)}
@@ -165,8 +177,8 @@ function QuestionView({ question, index, total, value, onChange, onNext, validat
                 onClick={() => onChange(opt)}
                 className={`flex-1 flex items-center gap-3 px-6 py-4 border-2 rounded-xl text-lg font-semibold transition-all ${
                   value === opt
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                    ? 'border-current bg-black/5'
+                    : 'border-black/10 hover:border-black/20'
                 }`}
               >
                 <span className="text-2xl">{opt === 'Yes' ? '👍' : '👎'}</span> {opt}
@@ -182,7 +194,7 @@ function QuestionView({ question, index, total, value, onChange, onNext, validat
               <button
                 key={star}
                 onClick={() => onChange(star)}
-                className={`text-4xl transition-colors leading-none ${Number(value) >= star ? 'text-yellow-400' : 'text-gray-200 hover:text-yellow-200'}`}
+                className={`text-4xl transition-colors leading-none ${Number(value) >= star ? 'text-yellow-500' : 'text-gray-200'}`}
               >
                 ★
               </button>
@@ -192,20 +204,20 @@ function QuestionView({ question, index, total, value, onChange, onNext, validat
 
         {/* Statement */}
         {question.type === 'statement' && (
-          <div className="text-gray-600 text-lg leading-relaxed mb-6">
+          <div className="text-lg leading-relaxed mb-6 opacity-80">
             {question.description || question.title}
           </div>
         )}
 
         {/* Date */}
         {question.type === 'date' && (
-          <div className="border-b-2 border-blue-500 pb-1 mb-6">
+          <div className="border-b-2 border-current pb-1 mb-6">
             <input
               autoFocus
               type="date"
               value={String(value ?? '')}
               onChange={e => onChange(e.target.value)}
-              className="text-xl text-gray-800 outline-none bg-transparent py-1"
+              className="text-xl outline-none bg-transparent py-1 w-full"
             />
           </div>
         )}
@@ -215,7 +227,7 @@ function QuestionView({ question, index, total, value, onChange, onNext, validat
           <motion.div
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-2 text-red-500 text-sm mb-4 bg-red-50 px-3 py-2 rounded-lg"
+            className="flex items-center gap-2 text-red-500 text-sm mb-4 bg-red-500/10 px-3 py-2 rounded-lg"
           >
             <span className="w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-xs flex-shrink-0">!</span>
             {validationError}
@@ -225,10 +237,10 @@ function QuestionView({ question, index, total, value, onChange, onNext, validat
         {/* OK button */}
         <button
           onClick={onNext}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded transition-colors flex items-center gap-2 text-sm"
+          className="text-white font-semibold py-2 px-6 rounded transition-colors text-lg flex items-center gap-2"
+          style={{ backgroundColor: buttonColor || '#2563eb' }}
         >
-          {isLast ? 'Submit' : 'OK'} <span className="text-blue-200 font-normal">✓</span>
-          {!isLast && <span className="text-blue-300 font-normal text-xs ml-1">press Enter ↵</span>}
+          {isLast ? 'Submit' : 'OK'} <span className="font-normal opacity-70">✓</span>
         </button>
       </div>
     </div>
@@ -241,13 +253,13 @@ function QuestionView({ question, index, total, value, onChange, onNext, validat
 function ThankYouScreen() {
   return (
     <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
-      <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6">
-        <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="w-16 h-16 bg-black/10 rounded-full flex items-center justify-center mb-6">
+        <svg className="w-8 h-8 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/>
         </svg>
       </div>
-      <h1 className="text-4xl font-semibold text-gray-900 mb-4">Thank you! 🎉</h1>
-      <p className="text-gray-500 text-lg">Your response has been recorded.</p>
+      <h1 className="text-4xl font-semibold mb-4">Thank you! 🎉</h1>
+      <p className="text-lg opacity-60">Your response has been recorded.</p>
     </div>
   );
 }
@@ -277,9 +289,6 @@ export default function RespondentFlow() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (phase !== 'questions') return;
-      if (e.key === 'ArrowDown' || (e.key === 'Enter' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA' && document.activeElement?.tagName !== 'SELECT')) {
-        // handled in component
-      }
       if (e.key === 'ArrowUp') {
         handlePrev();
       }
@@ -358,15 +367,14 @@ export default function RespondentFlow() {
   };
 
   if (loading) return (
-    <div className="flex h-screen items-center justify-center bg-white">
-      <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"/>
+    <div className="flex h-screen items-center justify-center">
+      <div className="w-8 h-8 border-2 border-current border-t-transparent rounded-full animate-spin"/>
     </div>
   );
 
   if (error) return (
-    <div className="flex h-screen items-center justify-center bg-white flex-col gap-4">
+    <div className="flex h-screen items-center justify-center flex-col gap-4">
       <p className="text-red-500 text-lg">{error}</p>
-      <p className="text-gray-400 text-sm">This form may not be published or the link may be invalid.</p>
     </div>
   );
 
@@ -384,13 +392,18 @@ export default function RespondentFlow() {
     exitUp: { y: 60, opacity: 0 },
   };
 
+  const bgColor = form?.design_settings?.bgColor || '#ffffff';
+  const textColor = form?.design_settings?.textColor || '#111827';
+  const fontFamily = form?.design_settings?.fontFamily === 'mono' ? 'monospace' : form?.design_settings?.fontFamily === 'serif' ? 'serif' : 'sans-serif';
+  const btnColor = form?.design_settings?.buttonColor || '#2563eb';
+
   return (
-    <div className="flex flex-col h-screen bg-white overflow-hidden">
-      {/* Top blue progress bar */}
-      <div className="h-1 bg-gray-200 w-full flex-shrink-0">
+    <div className="flex flex-col h-screen overflow-hidden" style={{ backgroundColor: bgColor, color: textColor, fontFamily }}>
+      {/* Top progress bar */}
+      <div className="h-1 w-full flex-shrink-0 bg-black/5">
         <div
-          className="h-full bg-blue-600 transition-all duration-500 ease-out"
-          style={{ width: `${progress}%` }}
+          className="h-full transition-all duration-500 ease-out"
+          style={{ width: `${progress}%`, backgroundColor: btnColor }}
         />
       </div>
 
@@ -424,6 +437,7 @@ export default function RespondentFlow() {
                 onNext={handleNext}
                 validationError={validationError}
                 isLast={currentQIndex === total - 1}
+                buttonColor={btnColor}
               />
             </motion.div>
           </AnimatePresence>

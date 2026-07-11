@@ -334,7 +334,7 @@ function AddContentModal({ onClose, onAddElement, onGenerateWithAI }: AddContent
 // ──────────────────────────────────────────────────────────────
 // Canvas preview per question type
 // ──────────────────────────────────────────────────────────────
-function QuestionPreview({ question, isWelcome, buttonColor }: { question: Question | null; isWelcome?: boolean; buttonColor?: string }) {
+function QuestionPreview({ question, isWelcome }: { question: Question | null; isWelcome?: boolean }) {
   if (!question) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -348,7 +348,7 @@ function QuestionPreview({ question, isWelcome, buttonColor }: { question: Quest
       <div className="flex flex-col items-center justify-center h-full px-16 text-center">
         <h1 className="text-4xl font-semibold text-gray-900 mb-4">{question.title || 'Form Title'}</h1>
         {question.description && <p className="text-lg text-gray-500 mb-8 max-w-md">{question.description}</p>}
-        <button className="text-white font-semibold py-3 px-8 rounded text-lg transition-colors shadow-sm" style={{ backgroundColor: buttonColor || '#2563eb' }}>start</button>
+        <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded text-lg transition-colors shadow-sm">start</button>
         <p className="text-gray-400 text-xs mt-3 flex items-center gap-1">
           <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           Takes X minutes
@@ -434,7 +434,7 @@ function QuestionPreview({ question, isWelcome, buttonColor }: { question: Quest
       )}
 
       <div className="mt-8">
-        <button className="text-white font-semibold py-2.5 px-6 rounded transition-colors text-sm" style={{ backgroundColor: buttonColor || '#2563eb' }}>OK ✓</button>
+        <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded transition-colors text-sm">OK ✓</button>
       </div>
     </div>
   );
@@ -975,7 +975,7 @@ export default function BuilderPage() {
               <div className="flex-1 flex items-center justify-center p-8 relative overflow-hidden" style={{ backgroundColor: designSettings.bgColor, fontFamily: designSettings.fontFamily === 'mono' ? 'monospace' : designSettings.fontFamily === 'serif' ? 'serif' : 'sans-serif' }}>
                 <div className="w-full max-w-3xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] rounded-2xl min-h-[480px] flex flex-col relative overflow-hidden" style={{ backgroundColor: 'white', color: designSettings.textColor }}>
                   <div className="flex-1">
-                    <QuestionPreview question={selectedQuestion} isWelcome={isWelcomeSelected} buttonColor={designSettings.buttonColor} />
+                    <QuestionPreview question={selectedQuestion} isWelcome={isWelcomeSelected} />
                   </div>
                 </div>
 
