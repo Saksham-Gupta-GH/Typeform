@@ -444,7 +444,6 @@ function QuestionPreview({ question, isWelcome, buttonColor }: { question: Quest
       <div className="mt-8">
         <button className="text-white font-semibold py-2.5 px-6 rounded transition-colors text-sm hover:opacity-90 active:scale-95" style={{ backgroundColor: buttonColor || '#2563eb' }}>OK ✓</button>
       </div>
-    </div>
       </motion.div>
     </AnimatePresence>
   );
