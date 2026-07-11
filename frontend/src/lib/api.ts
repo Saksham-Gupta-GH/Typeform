@@ -45,7 +45,12 @@ export async function createForm(data: { title: string; description?: string }):
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error('Failed to create form');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    const errorMsg = errorData.detail || `HTTP ${res.status}`;
+    console.error('Create form error:', errorMsg, errorData);
+    throw new Error(`Failed to create form: ${errorMsg}`);
+  }
   return res.json();
 }
 
@@ -55,7 +60,12 @@ export async function updateForm(formId: number, data: { title?: string; descrip
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error('Failed to update form');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    const errorMsg = errorData.detail || `HTTP ${res.status}`;
+    console.error('Update form error:', errorMsg, errorData);
+    throw new Error(`Failed to update form: ${errorMsg}`);
+  }
   return res.json();
 }
 
@@ -63,7 +73,12 @@ export async function deleteForm(formId: number): Promise<{ message: string }> {
   const res = await fetch(`${API_BASE_URL}/forms/${formId}`, {
     method: 'DELETE',
   });
-  if (!res.ok) throw new Error('Failed to delete form');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    const errorMsg = errorData.detail || `HTTP ${res.status}`;
+    console.error('Delete form error:', errorMsg, errorData);
+    throw new Error(`Failed to delete form: ${errorMsg}`);
+  }
   return res.json();
 }
 
@@ -71,13 +86,23 @@ export async function duplicateForm(formId: number): Promise<Form> {
   const res = await fetch(`${API_BASE_URL}/forms/${formId}/duplicate`, {
     method: 'POST',
   });
-  if (!res.ok) throw new Error('Failed to duplicate form');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    const errorMsg = errorData.detail || `HTTP ${res.status}`;
+    console.error('Duplicate form error:', errorMsg, errorData);
+    throw new Error(`Failed to duplicate form: ${errorMsg}`);
+  }
   return res.json();
 }
 
 export async function fetchQuestions(formId: string): Promise<Question[]> {
   const res = await fetch(`${API_BASE_URL}/questions/form/${formId}`);
-  if (!res.ok) throw new Error('Failed to fetch questions');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    const errorMsg = errorData.detail || `HTTP ${res.status}`;
+    console.error('Fetch questions error:', errorMsg, errorData);
+    throw new Error(`Failed to fetch questions: ${errorMsg}`);
+  }
   return res.json();
 }
 
@@ -87,7 +112,12 @@ export async function createQuestion(formId: string, questionData: Partial<Quest
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ ...questionData, form_id: parseInt(formId) }),
   });
-  if (!res.ok) throw new Error('Failed to create question');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    const errorMsg = errorData.detail || `HTTP ${res.status}`;
+    console.error('Create question error:', errorMsg, errorData);
+    throw new Error(`Failed to create question: ${errorMsg}`);
+  }
   return res.json();
 }
 
@@ -97,7 +127,12 @@ export async function updateQuestion(questionId: number, questionData: Partial<Q
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(questionData),
   });
-  if (!res.ok) throw new Error('Failed to update question');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    const errorMsg = errorData.detail || `HTTP ${res.status}`;
+    console.error('Update question error:', errorMsg, errorData);
+    throw new Error(`Failed to update question: ${errorMsg}`);
+  }
   return res.json();
 }
 

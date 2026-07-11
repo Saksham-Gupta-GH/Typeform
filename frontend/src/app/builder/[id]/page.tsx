@@ -675,13 +675,16 @@ export default function BuilderPage({ params }: { params: { id: string } }) {
         settings: (type === 'multiple_choice' || type === 'dropdown') ? { options: ['Option 1', 'Option 2'] } : 
                    type === 'rating' ? { min: 1, max: 5 } : undefined,
       };
+      console.log('Creating question with:', defaults);
       const newQ = await createQuestion(params.id, defaults);
       setQuestions(prev => [...prev, newQ]);
       setSelectedId(newQ.id);
+      showToast(`✓ Added ${TYPE_META[type]?.label || 'question'}`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to add question';
+      console.error('Error in handleAddElement:', msg);
       showToast(`✕ ${msg}`);
-      throw err; // Re-throw so modal doesn't close
+      throw err;
     }
   };
 

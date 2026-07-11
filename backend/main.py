@@ -1,20 +1,53 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 import models
 from database import engine
 import os
+import sqlite3
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 # Create the database tables
 models.Base.metadata.create_all(bind=engine)
 
+# Run migration to add missing columns
+try:
+    import migrate_db
+    migrate_db.migrate()
+except Exception as e:
+    logger.warning(f"Migration warning: {e}")
+
 # Disable redirect_slashes to prevent 307 redirects
 app = FastAPI(title="Typeform Clone API", redirect_slashes=False)
+
+logger.info("FastAPI app initialized")
+
+# Custom exception handler for validation errors
+@app.exception_handler(RequestValidationError)
+def validation_exception_handler(request, exc):
+    logger.error(f"Validation error: {exc.errors()}")
+    logger.error(f"Request headers: {dict(request.headers)}")
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors()},
+    )
 
 # Configure CORS
 origins = [
     "http://localhost:3000",
+    "http://localhost",
     "http://20.219.130.205",
     "http://20.219.130.205:3000",
+    "https://typeform-ivory.vercel.app",
+    "https://*.vercel.app",
 ]
 
 # Allow overriding via environment variable
@@ -38,4 +71,14 @@ app.include_router(responses.router)
 
 @app.get("/")
 def read_root():
-    return {"message": "Typeform Clone API is running"}
+    logger.info("Root endpoint called")
+    return {
+        "message": "Typeform Clone API is running",
+        "status": "healthy",
+        "version": "1.0.0"
+    }
+
+@app.get("/health")
+def health_check():
+    logger.info("Health check endpoint called")
+    return {"status": "healthy"}
