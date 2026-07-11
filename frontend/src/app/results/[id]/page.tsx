@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import { fetchQuestions, fetchResponses, Question, FormSubmission } from '../../../lib/api';
 import { BarChart, Users, Clock, ArrowLeft, Download } from 'lucide-react';
 import Link from 'next/link';
 
-export default function ResultsDashboard({ params }: { params: { id: string } }) {
+export default function ResultsDashboard() {
+  const params = useParams() as { id: string };
   const [questions, setQuestions] = useState<Question[]>([]);
   const [responses, setResponses] = useState<FormSubmission[]>([]);
   const [loading, setLoading] = useState(true);

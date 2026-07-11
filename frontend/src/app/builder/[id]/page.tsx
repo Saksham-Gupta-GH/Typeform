@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import {
   Settings, Plus, GripVertical, Trash2, Smartphone, ChevronDown, Sparkles, X, 
   ChevronRight, HelpCircle, LayoutList, Share2, Diamond, Mic, Send, Play,
@@ -594,7 +594,8 @@ function RightSidebar({ question, onChange, isWelcome }: {
 // ──────────────────────────────────────────────────────────────
 // Main Builder Page
 // ──────────────────────────────────────────────────────────────
-export default function BuilderPage({ params }: { params: { id: string } }) {
+export default function BuilderPage() {
+  const params = useParams() as { id: string };
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'content'>('content');
   const [questions, setQuestions] = useState<Question[]>([]);

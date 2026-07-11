@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { fetchPublicForm, submitResponse, Question } from '../../../lib/api';
@@ -254,7 +255,8 @@ function ThankYouScreen() {
 // ─────────────────────────────────────────────────────────────────────────────
 // Main respondent flow
 // ─────────────────────────────────────────────────────────────────────────────
-export default function RespondentFlow({ params }: { params: { shareToken: string } }) {
+export default function RespondentFlow() {
+  const params = useParams() as { shareToken: string };
   const [form, setForm] = useState<FormResponse | null>(null);
   const [phase, setPhase] = useState<'welcome' | 'questions' | 'submitted'>('welcome');
   const [currentQIndex, setCurrentQIndex] = useState(0);
