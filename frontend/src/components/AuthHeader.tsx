@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { LogOut, User } from 'lucide-react';
 import { signOut, verifyToken } from '@/lib/api';
+import { usePathname } from 'next/navigation';
 import AuthModal from './AuthModal';
 
 export default function AuthHeader() {
   const [user, setUser] = useState<{ name: string; email: string; token: string } | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const pathname = usePathname();
 
   useEffect(() => {
     // Load user from localStorage and verify token
@@ -107,13 +109,15 @@ export default function AuthHeader() {
             </button>
           </div>
         ) : (
-          <button
-            onClick={() => setShowAuthModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm"
-          >
-            <User size={16} />
-            Sign In
-          </button>
+          pathname !== '/' && (
+            <button
+              onClick={() => setShowAuthModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm"
+            >
+              <User size={16} />
+              Sign In
+            </button>
+          )
         )}
       </div>
     </>
