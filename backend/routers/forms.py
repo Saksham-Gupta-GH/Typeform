@@ -6,6 +6,8 @@ import logging
 import models, schemas
 from database import get_db
 
+from routers.auth import get_current_user
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(
@@ -14,11 +16,13 @@ router = APIRouter(
 )
 
 @router.post("", response_model=schemas.Form)
-def create_form(form: schemas.FormCreate, db: Session = Depends(get_db)):
+def create_form(form: schemas.FormCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     try:
         logger.info(f"Received FormCreate request: {form}")
         logger.info(f"Creating form: title={form.title}")
         db_form = models.Form(**form.model_dump())
+        if current_user:
+            db_form.user_id = current_user.id
         db.add(db_form)
         db.commit()
         db.refresh(db_form)
@@ -32,9 +36,13 @@ def create_form(form: schemas.FormCreate, db: Session = Depends(get_db)):
 
 
 @router.get("", response_model=List[schemas.Form])
-def read_forms(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def read_forms(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     try:
-        forms = db.query(models.Form).offset(skip).limit(limit).all()
+        query = db.query(models.Form)
+        if current_user:
+            query = query.filter(models.Form.user_id == current_user.id)
+            
+        forms = query.offset(skip).limit(limit).all()
         for form in forms:
             form.response_count = db.query(models.Response).filter(models.Response.form_id == form.id).count()
         return forms

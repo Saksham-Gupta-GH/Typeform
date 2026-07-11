@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { fetchQuestions, fetchResponses, Question, FormSubmission } from '../../../lib/api';
+import AuthHeader from '@/components/AuthHeader';
 import { BarChart, Users, Clock, ArrowLeft, Download, Diamond, Calendar, Filter, LayoutList, ArrowUp, ArrowDown, LineChart, Search, Quote } from 'lucide-react';
 import Link from 'next/link';
 import { InsightsCanvas } from './InsightsCanvas';
@@ -12,6 +13,7 @@ export default function ResultsDashboard() {
   const [activeTab, setActiveTab] = useState<'insights' | 'summary' | 'responses'>('insights');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [responses, setResponses] = useState<FormSubmission[]>([]);
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -46,11 +48,16 @@ export default function ResultsDashboard() {
   const downloadCSV = () => {
     if (responses.length === 0) return;
     
+    // Filter tableData if there are selected rows
+    const dataToDownload = selectedRows.size > 0 
+      ? tableData.filter(row => selectedRows.has(row.id as number))
+      : tableData;
+    
     // Headers
     const headers = ['Submitted At', ...questions.map(q => `"${q.title.replace(/"/g, '""')}"`)];
     
     // Rows
-    const rows = tableData.map(row => {
+    const rows = dataToDownload.map(row => {
       return [
         `"${String(row.submitted_at).replace(/"/g, '""')}"`,
         ...questions.map(q => {
@@ -109,10 +116,11 @@ export default function ResultsDashboard() {
           <button className="text-sm font-medium text-gray-900 border-b-2 border-gray-900 px-1 py-1">Results</button>
         </div>
         
-        <div className="flex justify-end w-1/3">
-          <button className="bg-teal-700 hover:bg-teal-800 text-white text-sm font-medium px-3 py-1.5 rounded transition-colors">
+        <div className="flex items-center justify-end gap-3 w-1/3">
+          <button className="bg-teal-700 hover:bg-teal-800 text-white text-sm font-medium px-3 py-1.5 rounded transition-colors hidden sm:block">
             View plans
           </button>
+          <AuthHeader />
         </div>
       </header>
 
@@ -262,12 +270,19 @@ export default function ResultsDashboard() {
             <div className="p-4 border-b border-gray-200 flex justify-between items-center">
               <h3 className="font-semibold text-gray-800">Individual Responses</h3>
               {responses.length > 0 && (
-                <button 
-                  onClick={downloadCSV}
-                  className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-black border border-gray-300 rounded px-3 py-1.5 hover:bg-gray-50 transition-colors"
-                >
-                  <Download size={16} /> Download CSV
-                </button>
+                <div className="flex items-center gap-3">
+                  {selectedRows.size > 0 && (
+                    <span className="text-sm text-gray-500">
+                      {selectedRows.size} selected
+                    </span>
+                  )}
+                  <button 
+                    onClick={downloadCSV}
+                    className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-black border border-gray-300 rounded px-3 py-1.5 hover:bg-gray-50 transition-colors"
+                  >
+                    <Download size={16} /> Download CSV
+                  </button>
+                </div>
               )}
             </div>
             {responses.length === 0 ? (
@@ -279,6 +294,20 @@ export default function ResultsDashboard() {
                 <table className="w-full text-sm text-left text-gray-500">
                   <thead className="text-xs text-gray-700 uppercase bg-gray-50">
                     <tr>
+                      <th className="px-6 py-3 w-10">
+                        <input 
+                          type="checkbox"
+                          className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                          checked={selectedRows.size === tableData.length && tableData.length > 0}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedRows(new Set(tableData.map(r => r.id as number)));
+                            } else {
+                              setSelectedRows(new Set());
+                            }
+                          }}
+                        />
+                      </th>
                       <th className="px-6 py-3 whitespace-nowrap">Submitted At</th>
                       {questions.map(q => (
                         <th key={q.id} className="px-6 py-3 whitespace-nowrap">
@@ -290,6 +319,22 @@ export default function ResultsDashboard() {
                   <tbody>
                     {tableData.map((row, i) => (
                       <tr key={String(row.id)} className="bg-white border-b hover:bg-gray-50">
+                        <td className="px-6 py-4">
+                          <input 
+                            type="checkbox"
+                            className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                            checked={selectedRows.has(row.id as number)}
+                            onChange={(e) => {
+                              const newSelected = new Set(selectedRows);
+                              if (e.target.checked) {
+                                newSelected.add(row.id as number);
+                              } else {
+                                newSelected.delete(row.id as number);
+                              }
+                              setSelectedRows(newSelected);
+                            }}
+                          />
+                        </td>
                         <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                           {row.submitted_at}
                         </td>

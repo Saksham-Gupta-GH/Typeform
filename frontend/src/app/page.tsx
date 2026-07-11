@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, LayoutGrid, Users, Zap, MoreHorizontal, Diamond, HelpCircle, MessageSquare, Calendar, LayoutList, Mic, Send, X, ChevronDown, ChevronUp, FileText, Trash2, Copy, Edit3, Link, Move, ExternalLink } from 'lucide-react';
 import { fetchForms, createForm, deleteForm, duplicateForm, updateForm, Form, signIn, signOut, verifyToken } from '@/lib/api';
+import AuthHeader from '@/components/AuthHeader';
 import { generateFormWithAI } from '@/lib/openrouter';
 
 type ContextMenu = {
@@ -336,7 +337,7 @@ export default function WorkspaceDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {/* User profile is handled by global AuthHeader in top right */}
+            <AuthHeader />
           </div>
         </header>
 

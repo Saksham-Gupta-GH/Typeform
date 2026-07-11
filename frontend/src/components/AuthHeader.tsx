@@ -90,34 +90,32 @@ export default function AuthHeader() {
         onSignIn={handleSignIn}
       />
 
-      <div className="fixed top-4 right-4 z-40 flex items-center gap-3">
+      <div className="flex items-center gap-3">
         {user ? (
-          <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm">
-            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-sm font-bold text-blue-600">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg shadow-sm">
+            <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-sm font-bold text-blue-600">
               {user.name.charAt(0).toUpperCase()}
             </div>
-            <div className="flex flex-col">
-              <span className="text-xs font-medium text-gray-900">{user.name}</span>
-              <span className="text-xs text-gray-500">{user.email}</span>
+            <div className="flex flex-col hidden sm:flex">
+              <span className="text-xs font-medium text-gray-900 leading-tight">{user.name}</span>
+              <span className="text-[10px] text-gray-500 leading-tight">{user.email}</span>
             </div>
             <button
               onClick={handleSignOut}
-              className="ml-2 p-1.5 hover:bg-gray-100 rounded transition-colors text-gray-600 hover:text-red-600"
+              className="ml-1 p-1 hover:bg-gray-100 rounded transition-colors text-gray-500 hover:text-red-600 flex items-center justify-center"
               title="Sign out"
             >
               <LogOut size={16} />
             </button>
           </div>
         ) : (
-          pathname !== '/' && (
             <button
               onClick={() => setShowAuthModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg transition-colors shadow-sm text-sm"
             >
               <User size={16} />
               Sign In
             </button>
-          )
         )}
       </div>
     </>

@@ -10,6 +10,7 @@ import {
 import { WorkflowCanvas } from './WorkflowCanvas';
 import LogicModal from '@/components/LogicModal';
 import { fetchQuestions, createQuestion, updateQuestion, deleteQuestion, reorderQuestions, Question, fetchForms, updateForm } from '../../../lib/api';
+import AuthHeader from '@/components/AuthHeader';
 import { generateFormWithAI } from '../../../lib/openrouter';
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent,
@@ -877,12 +878,10 @@ export default function BuilderPage() {
           <button className="text-gray-500 hover:text-gray-800 transition-colors p-1.5 rounded hover:bg-gray-100" title="Copy Link">
             <Link2 size={18}/>
           </button>
-          <button className="bg-teal-700 hover:bg-teal-800 text-white text-sm font-medium px-3 py-1.5 rounded transition-colors">
+          <button className="bg-teal-700 hover:bg-teal-800 text-white text-sm font-medium px-3 py-1.5 rounded transition-colors hidden sm:block">
             View plans
           </button>
-          <div className="w-8 h-8 rounded-full bg-[#f8e1cc] text-[#935b31] flex items-center justify-center font-bold text-xs cursor-pointer border border-[#f4cda8]">
-            {signInName ? signInName.charAt(0).toUpperCase() : 'U'}
-          </div>
+          <AuthHeader />
         </div>
       </header>
 

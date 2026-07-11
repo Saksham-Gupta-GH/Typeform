@@ -100,3 +100,21 @@ def verify_token(token: str):
     except Exception as e:
         logger.error(f"Token verification error: {str(e)}", exc_info=True)
         raise HTTPException(status_code=401, detail="Token verification failed")
+
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
+security = HTTPBearer(auto_error=False)
+
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
+    if not credentials:
+        return None
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+        if email is None:
+            return None
+        user = db.query(models.User).filter(models.User.email == email).first()
+        return user
+    except Exception:
+        return None
