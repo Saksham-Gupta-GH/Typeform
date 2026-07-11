@@ -45,9 +45,9 @@ Return ONLY valid JSON matching this exact schema (no markdown, no explanation):
       "description": "optional string",
       "is_required": true|false,
       "settings": {
-        "options": ["option1", "option2"],  // required for multiple_choice and dropdown
-        "min": 1,  // optional for rating
-        "max": 5   // optional for rating
+        "options": ["option1", "option2"],
+        "min": 1,
+        "max": 5
       }
     }
   ]
@@ -70,42 +70,64 @@ Rules:
     headers['Authorization'] = `Bearer ${apiKey}`;
   }
 
-  const response = await fetch(OPENROUTER_API_URL, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
-      model: 'meta-llama/llama-3.2-3b-instruct:free',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: prompt }
-      ],
-      temperature: 0.7,
-      max_tokens: 2000,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    if (response.status === 429) {
-      throw new Error('AI is currently busy due to high demand. Please try again in a few seconds.');
-    }
-    throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
-  }
-
-  const data = await response.json();
-  const content = data.choices?.[0]?.message?.content;
-  
-  if (!content) {
-    throw new Error('No content returned from AI');
-  }
-
-  // Strip markdown code blocks if present
-  const cleanContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-  
   try {
-    const parsed = JSON.parse(cleanContent);
-    return parsed as GeneratedForm;
-  } catch {
-    throw new Error('Failed to parse AI response as JSON');
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout
+
+    const response = await fetch(OPENROUTER_API_URL, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        model: 'meta-llama/llama-3.2-3b-instruct:free',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 1500,
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => response.statusText);
+      if (response.status === 429) {
+        throw new Error('API rate limit exceeded. Please try again in a few seconds.');
+      }
+      if (response.status >= 500) {
+        throw new Error('AI service is temporarily unavailable. Please try again shortly.');
+      }
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+    
+    if (!content) {
+      throw new Error('No response from AI service');
+    }
+
+    // Strip markdown code blocks if present
+    const cleanContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    
+    try {
+      const parsed = JSON.parse(cleanContent);
+      
+      // Validate the response structure
+      if (!parsed.questions || !Array.isArray(parsed.questions)) {
+        throw new Error('Invalid response format');
+      }
+
+      return parsed as GeneratedForm;
+    } catch {
+      throw new Error('Invalid AI response format');
+    }
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Request timed out. Please try again.');
+    }
+    throw error;
   }
 }

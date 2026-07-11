@@ -58,8 +58,13 @@ interface SortableItemProps {
 }
 
 function SortableQuestionItem({ id, question, index, isSelected, onSelect, onDelete }: SortableItemProps) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
-  const style = { transform: CSS.Transform.toString(transform), transition };
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = { 
+    transform: CSS.Transform.toString(transform), 
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 999 : 'auto',
+  };
 
   return (
     <div
@@ -68,9 +73,14 @@ function SortableQuestionItem({ id, question, index, isSelected, onSelect, onDel
       onClick={() => onSelect(id)}
       className={`group flex items-center p-2.5 rounded-lg cursor-pointer transition-colors mb-1.5 border ${
         isSelected ? 'bg-blue-50 border-blue-200' : 'bg-white hover:bg-gray-50 border-transparent shadow-[0_1px_3px_rgba(0,0,0,0.06)]'
-      }`}
+      } ${isDragging ? 'shadow-lg' : ''}`}
     >
-      <div {...attributes} {...listeners} className="cursor-grab mr-1 flex-shrink-0 text-gray-300 hover:text-gray-500">
+      <div 
+        {...attributes} 
+        {...listeners} 
+        className="cursor-grab active:cursor-grabbing mr-1 flex-shrink-0 text-gray-300 hover:text-gray-500 touch-none"
+        style={{ touchAction: 'none' }}
+      >
         <GripVertical size={14} />
       </div>
       <div className="flex-shrink-0 mr-2.5">
@@ -703,12 +713,24 @@ export default function BuilderPage({ params }: { params: { id: string } }) {
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
-    if (over && active.id !== over.id) {
+    if (!over || active.id === over.id) return;
+
+    try {
       const oldIdx = questions.findIndex(q => q.id === active.id);
       const newIdx = questions.findIndex(q => q.id === over.id);
+      
+      if (oldIdx === -1 || newIdx === -1) return;
+
       const reordered = arrayMove(questions, oldIdx, newIdx);
       setQuestions(reordered);
-      try { await reorderQuestions(reordered.map(q => q.id)); } catch (err) { console.error(err); }
+      
+      // Update backend with new order
+      await reorderQuestions(reordered.map(q => q.id));
+    } catch (err) {
+      console.error('Drag reorder failed:', err);
+      // Revert on error by reloading questions
+      const qs = await fetchQuestions(params.id);
+      setQuestions(qs);
     }
   };
 
