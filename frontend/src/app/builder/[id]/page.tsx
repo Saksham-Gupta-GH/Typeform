@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import {
   Settings, Plus, GripVertical, Trash2, Smartphone, ChevronDown, Sparkles, X, 
   ChevronRight, HelpCircle, LayoutList, Share2, Diamond, Mic, Send, Play,
-  RotateCcw, RefreshCw, Monitor
+  RotateCcw, RefreshCw, Monitor, Palette
 } from 'lucide-react';
 import { fetchQuestions, createQuestion, updateQuestion, deleteQuestion, reorderQuestions, Question, fetchForms, updateForm } from '../../../lib/api';
 import { generateFormWithAI } from '../../../lib/openrouter';
@@ -16,6 +16,7 @@ import {
   arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // ──────────────────────────────────────────────────────────────
 // Question type helpers
@@ -574,6 +575,7 @@ export default function BuilderPage() {
   const [chatLoading, setChatLoading] = useState(false);
   const [toast, setToast] = useState('');
   const [formId, setFormId] = useState<number | null>(null);
+  const [shareToken, setShareToken] = useState<string | null>(null);
   const signInName = typeof window !== 'undefined' ? localStorage.getItem('user_name') : null;
 
   const sensors = useSensors(
@@ -604,6 +606,7 @@ export default function BuilderPage() {
         if (form) {
           setFormTitle(form.title);
           setFormId(form.id);
+          setShareToken(form.share_token);
           if (form.design_settings) {
             setDesignSettings({
               bgColor: form.design_settings.bgColor || '#ffffff',
@@ -950,7 +953,7 @@ export default function BuilderPage() {
                 </div>
                 <div className="flex items-center gap-3 text-gray-500">
                   <button
-                    onClick={() => form && router.push(`/form/${form.share_token}?preview=1`)}
+                    onClick={() => shareToken && router.push(`/form/${shareToken}?preview=1`)}
                     className="flex items-center gap-1.5 text-sm font-medium text-gray-700 p-1.5 hover:bg-gray-100 rounded-md transition-colors" title="Preview"
                   >
                     <Play size={16}/> Preview
