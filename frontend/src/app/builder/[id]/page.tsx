@@ -579,6 +579,7 @@ function RightSidebar({ question, onChange, isWelcome }: {
             )}
           </>
         )}
+      </div>
     </aside>
   );
 }
@@ -852,7 +853,6 @@ export default function BuilderPage({ params }: { params: { id: string } }) {
                       >
                         <Plus size={15}/> Add question
                       </button>
-                    </div>
                   </>
                 )}
               </div>

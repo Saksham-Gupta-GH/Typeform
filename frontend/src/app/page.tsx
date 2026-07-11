@@ -276,6 +276,9 @@ export default function WorkspaceDashboard() {
               </div>
             </div>
           </div>
+        </header>
+
+        {/* Content */}
         <div className="flex-1 overflow-y-auto">
           <div className="px-10 py-6">
             {/* Workspace Header */}
