@@ -76,6 +76,11 @@ export default function AuthHeader({ hideButton = false }: { hideButton?: boolea
     setUser(null);
     localStorage.removeItem('typeform_user_auth');
     window.dispatchEvent(new Event('auth-state-change'));
+    
+    // Check if we have window and if we are not already on the homepage
+    if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+      window.location.href = '/';
+    }
   };
 
   if (loading) {

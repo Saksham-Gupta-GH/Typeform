@@ -39,8 +39,24 @@ export interface FormSubmission {
   answers: { question_id: number; value: string | number | boolean }[];
 }
 
+
+function getAuthHeaders(includeContentType = true): Record<string, string> {
+  const headers: Record<string, string> = {};
+  if (includeContentType) headers['Content-Type'] = 'application/json';
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('typeform_user_auth');
+    if (saved) {
+      try {
+        const { token } = JSON.parse(saved);
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+      } catch (e) {}
+    }
+  }
+  return headers;
+}
+
 export async function fetchForms(): Promise<Form[]> {
-  const res = await fetch(`${API_BASE_URL}/forms`);
+  const res = await fetch(`${API_BASE_URL}/forms`, { headers: getAuthHeaders(false) });
   if (!res.ok) {
     console.error('Fetch forms error:', res.status);
     throw new Error(`Failed to fetch forms`);
@@ -51,7 +67,7 @@ export async function fetchForms(): Promise<Form[]> {
 export async function createForm(data: { title: string; description?: string }): Promise<Form> {
   const res = await fetch(`${API_BASE_URL}/forms`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify(data),
   });
   if (!res.ok) {
@@ -71,7 +87,7 @@ export async function createForm(data: { title: string; description?: string }):
 export async function updateForm(formId: number, data: { title?: string; description?: string; is_published?: boolean; design_settings?: any }): Promise<Form> {
   const res = await fetch(`${API_BASE_URL}/forms/${formId}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify(data),
   });
   if (!res.ok) {
@@ -126,7 +142,7 @@ export async function createQuestion(formId: string, questionData: Partial<Quest
   
   const res = await fetch(`${API_BASE_URL}/questions`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify(payload),
   });
   
@@ -151,7 +167,7 @@ export async function createQuestion(formId: string, questionData: Partial<Quest
 export async function updateQuestion(questionId: number, questionData: Partial<Question>): Promise<Question> {
   const res = await fetch(`${API_BASE_URL}/questions/${questionId}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify(questionData),
   });
   if (!res.ok) {
@@ -174,7 +190,7 @@ export async function deleteQuestion(questionId: number): Promise<{ message: str
 export async function reorderQuestions(questionIds: number[]): Promise<{ message: string }> {
   const res = await fetch(`${API_BASE_URL}/questions/reorder`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify({ question_ids: questionIds }),
   });
   if (!res.ok) throw new Error('Failed to reorder questions');
@@ -184,7 +200,7 @@ export async function reorderQuestions(questionIds: number[]): Promise<{ message
 export async function submitResponse(shareToken: string, answers: { question_id: number, value: string | number | boolean }[]) {
   const res = await fetch(`${API_BASE_URL}/forms/public/${shareToken}/responses`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify({ answers }),
   });
   if (!res.ok) throw new Error('Failed to submit response');
@@ -198,7 +214,7 @@ export async function fetchPublicForm(shareToken: string) {
 }
 
 export async function fetchResponses(formId: string) {
-  const res = await fetch(`${API_BASE_URL}/forms/${formId}/responses`);
+  const res = await fetch(`${API_BASE_URL}/forms/${formId}/responses`, { headers: getAuthHeaders(false) });
   if (!res.ok) throw new Error('Failed to fetch responses');
   return res.json();
 }
@@ -207,7 +223,7 @@ export async function fetchResponses(formId: string) {
 export async function signUp(name: string, email: string, password: string): Promise<{ token: string; name: string; email: string }> {
   const res = await fetch(`${API_BASE_URL}/auth/signup`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify({ name, email, password }),
   });
   
@@ -223,7 +239,7 @@ export async function signUp(name: string, email: string, password: string): Pro
 export async function signIn(email: string, password: string): Promise<{ token: string; name: string; email: string }> {
   const res = await fetch(`${API_BASE_URL}/auth/signin`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify({ email, password }),
   });
   
@@ -239,7 +255,7 @@ export async function signIn(email: string, password: string): Promise<{ token: 
 export async function signOut(token: string): Promise<{ message: string }> {
   const res = await fetch(`${API_BASE_URL}/auth/signout`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify({ token }),
   });
   
@@ -258,7 +274,7 @@ export async function verifyToken(token: string): Promise<{ name: string; email:
 export async function saveFormDesign(formId: string, designSettings: Record<string, any>): Promise<Form> {
   const res = await fetch(`${API_BASE_URL}/forms/${formId}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify({ design_settings: designSettings }),
   });
 

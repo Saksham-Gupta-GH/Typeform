@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams, useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { fetchPublicForm, submitResponse, Question } from '../../../lib/api';
@@ -269,6 +270,10 @@ function ThankYouScreen() {
 // ─────────────────────────────────────────────────────────────────────────────
 export default function RespondentFlow() {
   const params = useParams() as { shareToken: string };
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const isPreview = searchParams.get('preview') === '1';
+  
   const [form, setForm] = useState<FormResponse | null>(null);
   const [phase, setPhase] = useState<'welcome' | 'questions' | 'submitted'>('welcome');
   const [currentQIndex, setCurrentQIndex] = useState(0);
@@ -399,6 +404,18 @@ export default function RespondentFlow() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ backgroundColor: bgColor, color: textColor, fontFamily }}>
+      {isPreview && (
+        <div className="absolute top-4 left-4 z-50">
+          <button
+            onClick={() => router.push(`/builder/${form.id}`)}
+            className="flex items-center gap-2 px-3 py-1.5 bg-black/10 hover:bg-black/20 rounded-lg text-sm font-medium transition-colors"
+          >
+            <ArrowLeft size={16} />
+            Back to Builder
+          </button>
+        </div>
+      )}
+      
       {/* Top progress bar */}
       <div className="h-1 w-full flex-shrink-0 bg-black/5">
         <div
