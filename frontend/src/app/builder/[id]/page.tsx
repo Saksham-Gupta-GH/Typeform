@@ -5,8 +5,9 @@ import { useRouter, useParams } from 'next/navigation';
 import {
   Settings, Plus, GripVertical, Trash2, Smartphone, ChevronDown, Sparkles, X, 
   ChevronRight, HelpCircle, LayoutList, Share2, Diamond, Mic, Send, Play,
-  RotateCcw, RefreshCw, Monitor, Palette
+  RotateCcw, RefreshCw, Monitor, Palette, Link2
 } from 'lucide-react';
+import { WorkflowCanvas } from './WorkflowCanvas';
 import { fetchQuestions, createQuestion, updateQuestion, deleteQuestion, reorderQuestions, Question, fetchForms, updateForm } from '../../../lib/api';
 import { generateFormWithAI } from '../../../lib/openrouter';
 import {
@@ -21,7 +22,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 // ──────────────────────────────────────────────────────────────
 // Question type helpers
 // ──────────────────────────────────────────────────────────────
-const TYPE_META: Record<string, { label: string; color: string; bg: string; icon: string }> = {
+export const TYPE_META: Record<string, { label: string; color: string; bg: string; icon: string }> = {
   short_text:      { label: 'Short Text',      color: '#3b82f6', bg: '#dbeafe', icon: '—' },
   long_text:       { label: 'Long Text',        color: '#3b82f6', bg: '#dbeafe', icon: '≡' },
   multiple_choice: { label: 'Multiple Choice',  color: '#a855f7', bg: '#f3e8ff', icon: '☰' },
@@ -572,6 +573,7 @@ function RightSidebar({ question, onChange }: {
 export default function BuilderPage() {
   const params = useParams() as { id: string };
   const router = useRouter();
+  const [mainTab, setMainTab] = useState<'content' | 'workflow' | 'connect' | 'share'>('content');
   const [activeTab, setActiveTab] = useState<'content' | 'design'>('content');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -831,19 +833,21 @@ export default function BuilderPage() {
         </div>
 
         <div className="hidden md:flex gap-4 justify-center">
-          <button className="text-sm font-medium text-gray-900 border-b-2 border-gray-900 px-1 py-4">Create</button>
-          <button className="text-sm font-medium text-gray-500 hover:text-gray-900 px-1 py-4 transition-colors">Connect</button>
+          <button onClick={() => setMainTab('content')} className={`text-sm font-medium px-1 py-4 transition-colors ${mainTab === 'content' ? 'text-gray-900 border-b-2 border-gray-900' : 'text-gray-500 hover:text-gray-900'}`}>Content</button>
+          <button onClick={() => setMainTab('workflow')} className={`text-sm font-medium px-1 py-4 transition-colors ${mainTab === 'workflow' ? 'text-gray-900 border-b-2 border-gray-900' : 'text-gray-500 hover:text-gray-900'}`}>Workflow</button>
+          <button onClick={() => setMainTab('connect')} className={`text-sm font-medium px-1 py-4 transition-colors ${mainTab === 'connect' ? 'text-gray-900 border-b-2 border-gray-900' : 'text-gray-500 hover:text-gray-900'}`}>Connect</button>
+          <button onClick={() => setMainTab('share')} className={`text-sm font-medium px-1 py-4 transition-colors ${mainTab === 'share' ? 'text-gray-900 border-b-2 border-gray-900' : 'text-gray-500 hover:text-gray-900'}`}>Share</button>
           <button onClick={() => router.push(`/results/${formId}`)} className="text-sm font-medium text-gray-500 hover:text-gray-900 px-1 py-4 transition-colors">Results</button>
         </div>
 
         <div className="flex items-center gap-2 md:gap-3">
-          <button
-            onClick={handleShareOrPublish}
-            className="text-gray-900 border border-gray-300 rounded-md px-3 py-1.5 text-sm font-medium flex items-center gap-1.5 hover:bg-gray-50 transition-colors"
-          >
-            <Share2 size={14}/> Share
+          <button className="text-gray-500 hover:text-gray-800 transition-colors p-1.5 rounded hover:bg-gray-100" title="Copy Link">
+            <Link2 size={18}/>
           </button>
-          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs cursor-pointer border border-blue-200">
+          <button className="bg-teal-700 hover:bg-teal-800 text-white text-sm font-medium px-3 py-1.5 rounded transition-colors">
+            View plans
+          </button>
+          <div className="w-8 h-8 rounded-full bg-[#f8e1cc] text-[#935b31] flex items-center justify-center font-bold text-xs cursor-pointer border border-[#f4cda8]">
             {signInName ? signInName.charAt(0).toUpperCase() : 'U'}
           </div>
         </div>
@@ -851,8 +855,11 @@ export default function BuilderPage() {
 
       {/* ── Main Area ── */}
       <div className="flex flex-col md:flex-row w-full h-full pt-14 overflow-y-auto md:overflow-hidden">
-        {/* ── LEFT SIDEBAR ── */}
-        <aside className="w-full md:w-[272px] bg-[#f9f9f9] border-b md:border-b-0 md:border-r border-gray-200 flex flex-col flex-shrink-0 min-h-[300px] md:min-h-0">
+        
+        {mainTab === 'content' && (
+          <>
+            {/* ── LEFT SIDEBAR ── */}
+            <aside className="w-full md:w-[272px] bg-[#f9f9f9] border-b md:border-b-0 md:border-r border-gray-200 flex flex-col flex-shrink-0 min-h-[300px] md:min-h-0">
           {/* Sidebar Tabs */}
           <div className="flex items-center p-3 border-b border-gray-200 gap-1">
             <button
@@ -1008,6 +1015,37 @@ export default function BuilderPage() {
               question={selectedQuestion}
               onChange={handleUpdateSelected}
             />
+          </>
+        )}
+
+        {mainTab === 'workflow' && (
+          <div className="flex-1 w-full h-full">
+            <WorkflowCanvas questions={questions} />
+          </div>
+        )}
+
+        {mainTab === 'connect' && (
+          <div className="flex-1 w-full h-full flex flex-col items-center justify-center bg-gray-50 p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Connect to other apps</h2>
+            <p className="text-gray-500 mb-6">Send your form responses directly to Google Sheets, Notion, or Slack.</p>
+            <div className="p-8 border-2 border-dashed border-gray-300 rounded-xl max-w-md w-full text-center">
+              <span className="text-gray-400">Available on higher plans</span>
+            </div>
+          </div>
+        )}
+
+        {mainTab === 'share' && (
+          <div className="flex-1 w-full h-full flex flex-col items-center justify-center bg-gray-50 p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Share your form</h2>
+            <p className="text-gray-500 mb-6">Your form is ready to be shared with the world.</p>
+            <div className="flex gap-4">
+              <button onClick={handleShareOrPublish} className="bg-gray-900 hover:bg-gray-800 text-white font-medium px-6 py-2.5 rounded-md flex items-center gap-2">
+                <Share2 size={16}/> Copy Link
+              </button>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

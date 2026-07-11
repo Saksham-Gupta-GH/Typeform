@@ -1,52 +1,97 @@
 --- frontend/src/app/builder/[id]/page.tsx
 +++ frontend/src/app/builder/[id]/page.tsx
-@@ -873,6 +873,7 @@
+@@ -443,10 +443,8 @@
+ // ──────────────────────────────────────────────────────────────
+ // Right Sidebar Settings
+ // ──────────────────────────────────────────────────────────────
+-function RightSidebar({ question, onChange }: {
++function RightSidebar({ question, onChange }: {
+   question: Question | null;
+   onChange: (updates: Partial<Question>) => void;
+ }) {
+   if (!question) {
+     return (
+       <aside className="w-[300px] bg-white border-l border-gray-200 flex items-center justify-center">
+         <p className="text-gray-400 text-sm">Select a question</p>
+       </aside>
+     );
+   }
  
-             <aside className="w-[272px] bg-[#f9f9f9] border-r border-gray-200 flex flex-col flex-shrink-0">
--              {/* Removed Universal mode selector */}
--
-+              {activeTab === 'design' ? (
-+                <div className="flex-1 overflow-y-auto p-5">
-+                  <h3 className="text-sm font-semibold text-gray-900 mb-4">Design</h3>
-+                  <div className="space-y-4">
-+                    <div>
-+                      <label className="block text-xs font-medium text-gray-700 mb-1">Background Color</label>
-+                      <div className="flex items-center gap-2">
-+                        <input type="color" value={designSettings.bgColor} onChange={e => handleDesignChange('bgColor', e.target.value)} className="w-8 h-8 rounded cursor-pointer border-0 p-0" />
-+                        <span className="text-sm text-gray-500 uppercase">{designSettings.bgColor}</span>
-+                      </div>
-+                    </div>
-+                    <div>
-+                      <label className="block text-xs font-medium text-gray-700 mb-1">Text Color</label>
-+                      <div className="flex items-center gap-2">
-+                        <input type="color" value={designSettings.textColor} onChange={e => handleDesignChange('textColor', e.target.value)} className="w-8 h-8 rounded cursor-pointer border-0 p-0" />
-+                        <span className="text-sm text-gray-500 uppercase">{designSettings.textColor}</span>
-+                      </div>
-+                    </div>
-+                    <div>
-+                      <label className="block text-xs font-medium text-gray-700 mb-1">Button Color</label>
-+                      <div className="flex items-center gap-2">
-+                        <input type="color" value={designSettings.buttonColor} onChange={e => handleDesignChange('buttonColor', e.target.value)} className="w-8 h-8 rounded cursor-pointer border-0 p-0" />
-+                        <span className="text-sm text-gray-500 uppercase">{designSettings.buttonColor}</span>
-+                      </div>
-+                    </div>
-+                    <div>
-+                      <label className="block text-xs font-medium text-gray-700 mb-1">Font Family</label>
-+                      <select value={designSettings.fontFamily} onChange={e => handleDesignChange('fontFamily', e.target.value)} className="w-full text-sm border-gray-300 rounded-md shadow-sm p-2 outline-none">
-+                        <option value="sans">Sans-serif</option>
-+                        <option value="serif">Serif</option>
-+                        <option value="mono">Monospace</option>
-+                      </select>
-+                    </div>
-+                  </div>
-+                </div>
-+              ) : (
--              <div className="flex-1 overflow-y-auto p-3">
-+              <div className="flex-1 overflow-y-auto p-3 flex flex-col h-full">
-                 <h3 className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1">Pages</h3>
-@@ -904,6 +904,7 @@
+   const options = question.settings?.options || [];
+ 
+   return (
+     <aside className="w-[300px] bg-white border-l border-gray-200 flex flex-col shadow-[-2px_0_8px_rgba(0,0,0,0.03)]">
+       <div className="p-4 border-b border-gray-100">
+         <div className="flex items-center bg-gray-100 rounded-md px-3 py-2 cursor-pointer hover:bg-gray-200 transition-colors">
+           <TypeIcon type={question.type} />
+           <span className="ml-2 text-sm font-medium text-gray-700 flex-1 capitalize">{(TYPE_META[question.type]?.label) || question.type}</span>
+           <ChevronDown size={14} className="text-gray-500"/>
+         </div>
+       </div>
+ 
+       <div className="flex-1 overflow-y-auto p-5 space-y-5">
+         <div className="flex items-center justify-between">
+           <label className="text-sm font-medium text-gray-700 flex items-center gap-1">
+             Required <HelpCircle size={13} className="text-gray-400"/>
+           </label>
+           <div
+             onClick={() => onChange({ is_required: !question.is_required })}
+             className={`w-10 h-5 rounded-full p-0.5 flex items-center cursor-pointer transition-colors ${question.is_required ? 'bg-blue-600' : 'bg-gray-300'}`}
+           >
+             <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform ${question.is_required ? 'translate-x-5' : 'translate-x-0'}`}/>
+           </div>
+         </div>
+         
+         <div>
+           <label className="block text-sm font-medium text-gray-700 mb-2">Description / help text</label>
+           <textarea
+             value={question.description || ''}
+             onChange={e => onChange({ description: e.target.value })}
+             placeholder="Add a description..."
+             className="w-full border border-gray-200 rounded-md p-2.5 text-sm outline-none focus:border-blue-400 resize-none h-20 placeholder-gray-400 transition-colors"
+           />
+         </div>
+ 
+         {(question.type === 'multiple_choice' || question.type === 'dropdown') && (
+           <div className="pt-2 border-t border-gray-100">
+             <label className="block text-sm font-medium text-gray-700 mb-3">Choices</label>
+             <div className="space-y-2">
+               {options.map((opt, i) => (
+                 <div key={i} className="flex items-center gap-2 group">
+                   <input
+                     type="text"
+                     value={opt}
+                     onChange={e => {
+                       const newOpts = [...options];
+                       newOpts[i] = e.target.value;
+                       onChange({ settings: { ...question.settings, options: newOpts } });
+                     }}
+                     className="flex-1 border border-gray-200 rounded p-2 text-sm outline-none focus:border-blue-400 hover:border-gray-300 transition-colors"
+                   />
+                   <button
+                     onClick={() => {
+                       const newOpts = options.filter((_, idx) => idx !== i);
+                       onChange({ settings: { ...question.settings, options: newOpts } });
+                     }}
+                     className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                   >
+                     <X size={16}/>
                    </button>
                  </div>
-               </div>
-+              )}
-             </aside>
+               ))}
+               <button
+                 onClick={() => {
+                   const newOpts = [...options, `Option ${options.length + 1}`];
+                   onChange({ settings: { ...question.settings, options: newOpts } });
+                 }}
+                 className="w-full mt-2 py-1.5 border border-dashed border-gray-300 rounded text-sm text-blue-600 font-medium hover:bg-blue-50 transition-colors"
+               >
+                 + Add choice
+               </button>
+             </div>
+           </div>
+         )}
+       </div>
+     </aside>
+   );
+ }
