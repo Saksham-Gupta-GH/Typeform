@@ -525,7 +525,7 @@ function RightSidebar({ question, onChange }: {
             value={question.title || ''}
             onChange={e => onChange({ title: e.target.value })}
             placeholder="Type your question here..."
-            className="w-full border border-gray-200 rounded-md p-2.5 text-sm outline-none focus:border-blue-400 transition-colors mb-5"
+            className="w-full border border-gray-200 bg-white text-gray-900 rounded-md p-2.5 text-sm outline-none focus:border-blue-400 transition-colors mb-5"
           />
 
           <label className="block text-sm font-medium text-gray-700 mb-2">Description / help text</label>
@@ -533,7 +533,7 @@ function RightSidebar({ question, onChange }: {
             value={question.description || ''}
             onChange={e => onChange({ description: e.target.value })}
             placeholder="Add a description..."
-            className="w-full border border-gray-200 rounded-md p-2.5 text-sm outline-none focus:border-blue-400 resize-none h-20 placeholder-gray-400 transition-colors"
+            className="w-full border border-gray-200 bg-white text-gray-900 rounded-md p-2.5 text-sm outline-none focus:border-blue-400 resize-none h-20 placeholder-gray-400 transition-colors"
           />
         </div>
 
@@ -551,7 +551,7 @@ function RightSidebar({ question, onChange }: {
                       newOpts[i] = e.target.value;
                       onChange({ settings: { ...question.settings, options: newOpts } });
                     }}
-                    className="flex-1 border border-gray-200 rounded p-2 text-sm outline-none focus:border-blue-400 hover:border-gray-300 transition-colors"
+                    className="flex-1 border border-gray-200 bg-white text-gray-900 rounded p-2 text-sm outline-none focus:border-blue-400 hover:border-gray-300 transition-colors"
                   />
                   <button
                     onClick={() => {
@@ -1003,7 +1003,7 @@ export default function BuilderPage() {
               </div>
 
               <div className="flex-1 flex items-center justify-center p-8 relative overflow-hidden" style={{ backgroundColor: designSettings.bgColor, fontFamily: designSettings.fontFamily === 'mono' ? 'monospace' : designSettings.fontFamily === 'serif' ? 'serif' : 'sans-serif' }}>
-                <div className="w-full max-w-3xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] rounded-none md:rounded-2xl min-h-[480px] flex flex-col relative overflow-hidden" style={{ backgroundColor: 'white', color: designSettings.textColor }}>
+                <div className="w-full max-w-3xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] rounded-none md:rounded-2xl min-h-[480px] flex flex-col relative overflow-hidden" style={{ backgroundColor: 'transparent', color: designSettings.textColor }}>
                   <div className="flex-1">
                     <QuestionPreview question={selectedQuestion} buttonColor={designSettings.buttonColor} />
                   </div>
