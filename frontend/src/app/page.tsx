@@ -29,9 +29,22 @@ export default function WorkspaceDashboard() {
   const [aiInput, setAiInput] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSidebarOpen, setAiSidebarOpen] = useState(false);
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [showSignIn, setShowSignIn] = useState(false);
+  const [signInName, setSignInName] = useState('');
+  const [signInEmail, setSignInEmail] = useState('');
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Load user from localStorage
+    const saved = localStorage.getItem('typeform_user');
+    if (saved) {
+      try {
+        setUser(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to load user');
+      }
+    }
     loadForms();
   }, []);
 
@@ -142,6 +155,28 @@ export default function WorkspaceDashboard() {
 
   const formContextMenuForm = forms.find(f => f.id === contextMenu?.formId);
 
+  function handleSignIn() {
+    if (!signInName.trim() || !signInEmail.trim()) {
+      addToast('Please enter name and email', 'error');
+      return;
+    }
+    const userData = { name: signInName.trim(), email: signInEmail.trim() };
+    setUser(userData);
+    localStorage.setItem('typeform_user', JSON.stringify(userData));
+    setShowSignIn(false);
+    setSignInName('');
+    setSignInEmail('');
+    addToast(`Welcome, ${userData.name}!`);
+  }
+
+  function handleSignOut() {
+    setUser(null);
+    localStorage.removeItem('typeform_user');
+    setSignInName('');
+    setSignInEmail('');
+    addToast('Signed out successfully');
+  }
+
   return (
     <div className="flex h-screen bg-white font-sans text-gray-900 overflow-hidden">
       {/* Toast notifications */}
@@ -152,6 +187,54 @@ export default function WorkspaceDashboard() {
           </div>
         ))}
       </div>
+
+      {/* Sign In Modal */}
+      {showSignIn && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center" onClick={() => setShowSignIn(false)}>
+          <div className="absolute inset-0 bg-black/30" />
+          <div className="relative bg-white rounded-2xl shadow-2xl p-8 w-96" onClick={e => e.stopPropagation()}>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6">Sign In</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                <input
+                  type="text"
+                  value={signInName}
+                  onChange={e => setSignInName(e.target.value)}
+                  placeholder="Your name"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm outline-none focus:border-blue-500"
+                  onKeyDown={e => { if (e.key === 'Enter') handleSignIn(); }}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <input
+                  type="email"
+                  value={signInEmail}
+                  onChange={e => setSignInEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm outline-none focus:border-blue-500"
+                  onKeyDown={e => { if (e.key === 'Enter') handleSignIn(); }}
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-8">
+              <button
+                onClick={() => setShowSignIn(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSignIn}
+                className="flex-1 px-4 py-2 bg-blue-600 rounded-lg text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+              >
+                Sign In
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* AI Sidebar Panel */}
       {aiSidebarOpen && (
@@ -275,6 +358,26 @@ export default function WorkspaceDashboard() {
                 <FileText size={15}/> Forms
               </div>
             </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {user ? (
+              <>
+                <span className="text-sm text-gray-600">{user.name}</span>
+                <button
+                  onClick={handleSignOut}
+                  className="text-sm text-gray-500 hover:text-gray-700 font-medium px-3 py-1.5 rounded-md hover:bg-gray-100 transition-colors"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setShowSignIn(true)}
+                className="text-sm text-gray-900 border border-gray-300 rounded-md px-4 py-1.5 font-medium hover:bg-gray-50 transition-colors"
+              >
+                Sign In
+              </button>
+            )}
           </div>
         </header>
 
