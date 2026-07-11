@@ -78,7 +78,7 @@ Given the constraints of using SQLite (which requires a persistent filesystem), 
 ## Assumptions Made
 1. **No authentication required for respondents**: As requested by the assignment, anyone with the shareable link can fill out the form.
 2. **Simplified Creator Auth**: Creator authentication is simplified/assumed to be a default logged-in creator, so there is no complex login/signup flow for the workspace admin.
-3. **No 'Useless' UI Elements**: Based on explicit requirements, non-functional placeholder buttons (like "Webhooks", "Integrations", "Logic Jumps") were intentionally omitted to maintain a clean, fully-functional UI without misleading the user.
+3. **Logic Jumps Included as Bonus**: Basic logic jumps (e.g. skipping questions) are fully implemented, allowing users to define rules on a per-question basis. Other placeholders like "Webhooks" or "Integrations" are omitted to maintain a clean UI.
 4. **Local/VM Deployment**: The app uses SQLite for ease of setup and local/VM deployments. Standard serverless functions (like AWS Lambda or Vercel Serverless) are not ideal for the backend due to SQLite's need for a persistent file system, hence the Azure VM setup.
 
 ## API Overview

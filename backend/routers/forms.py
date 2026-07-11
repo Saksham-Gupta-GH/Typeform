@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 import uuid
 import logging
+import re
 import models, schemas
 from database import get_db
 
@@ -224,14 +225,50 @@ def submit_public_response(share_token: str, response: schemas.ResponseCreate, d
         if not form:
             raise HTTPException(status_code=404, detail="Form not found or not published")
             
+        # Fetch all questions for this form
+        questions = db.query(models.Question).filter(models.Question.form_id == form.id).all()
+        q_dict = {q.id: q for q in questions}
+        
+        ans_dict = {ans.question_id: str(ans.value).strip() if ans.value is not None else "" for ans in response.answers}
+        
+        # Validation
+        for q in questions:
+            val = ans_dict.get(q.id, "")
+            
+            # 1. Required Check
+            if q.is_required and not val:
+                raise HTTPException(status_code=400, detail=f"Question '{q.title}' is required.")
+                
+            if not val:
+                continue # Skip type validation if empty and not required
+                
+            # 2. Type/Format Validation
+            if q.type == "email":
+                if not re.match(r"[^@]+@[^@]+\.[^@]+", val):
+                    raise HTTPException(status_code=400, detail=f"Invalid email format for '{q.title}'.")
+            elif q.type == "number":
+                try:
+                    num_val = float(val)
+                    if q.settings:
+                        if "min" in q.settings and num_val < q.settings["min"]:
+                            raise HTTPException(status_code=400, detail=f"Value for '{q.title}' must be at least {q.settings['min']}.")
+                        if "max" in q.settings and num_val > q.settings["max"]:
+                            raise HTTPException(status_code=400, detail=f"Value for '{q.title}' must be at most {q.settings['max']}.")
+                except ValueError:
+                    raise HTTPException(status_code=400, detail=f"Value for '{q.title}' must be a number.")
+            elif q.type == "yes_no":
+                if str(val).lower() not in ["true", "false", "yes", "no", "1", "0"]:
+                    raise HTTPException(status_code=400, detail=f"Invalid yes/no value for '{q.title}'.")
+            
         db_response = models.Response(form_id=form.id)
         db.add(db_response)
         db.commit()
         db.refresh(db_response)
         
         for ans in response.answers:
-            db_answer = models.Answer(response_id=db_response.id, question_id=ans.question_id, value=ans.value)
-            db.add(db_answer)
+            if ans.question_id in q_dict:
+                db_answer = models.Answer(response_id=db_response.id, question_id=ans.question_id, value=ans.value)
+                db.add(db_answer)
             
         db.commit()
         db.refresh(db_response)
