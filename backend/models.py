@@ -15,6 +15,7 @@ class Form(Base):
     description = Column(String, nullable=True)
     status = Column(String, default="draft") # draft or published
     share_token = Column(String, unique=True, index=True, default=generate_share_token)
+    design_settings = Column(JSON, nullable=True)  # Store design customization
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

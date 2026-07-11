@@ -231,3 +231,20 @@ export async function verifyToken(token: string): Promise<{ name: string; email:
   if (!res.ok) throw new Error('Token verification failed');
   return res.json();
 }
+
+// Design settings API
+export async function saveFormDesign(formId: string, designSettings: Record<string, any>): Promise<Form> {
+  const res = await fetch(`${API_BASE_URL}/forms/${formId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ design_settings: designSettings }),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    const errorMsg = typeof errorData.detail === 'string' ? errorData.detail : 'Failed to save design';
+    throw new Error(errorMsg);
+  }
+
+  return res.json();
+}

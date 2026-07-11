@@ -92,12 +92,14 @@ class FormUpdate(BaseModel):
     description: Optional[str] = None
     status: Optional[FormStatus] = None
     is_published: Optional[bool] = None  # convenience alias
+    design_settings: Optional[Dict[str, Any]] = None
 
 class Form(FormBase):
     id: int
     share_token: str
     created_at: datetime
     updated_at: datetime
+    design_settings: Optional[Dict[str, Any]] = None
     questions: List[Question] = []
     response_count: int = 0
     is_published: bool = False
