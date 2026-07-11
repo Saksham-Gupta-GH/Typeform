@@ -57,7 +57,7 @@ class QuestionBase(BaseModel):
     settings: Optional[Dict[str, Any]] = None
 
 class QuestionCreate(QuestionBase):
-    pass
+    form_id: int
 
 class QuestionUpdate(BaseModel):
     type: Optional[QuestionType] = None
