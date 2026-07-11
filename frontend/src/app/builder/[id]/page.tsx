@@ -8,7 +8,7 @@ import {
   RotateCcw, RefreshCw, Monitor, Palette, Link2
 } from 'lucide-react';
 import { WorkflowCanvas } from './WorkflowCanvas';
-import LogicModal from '../../../components/LogicModal';
+import LogicModal from '@/components/LogicModal';
 import { fetchQuestions, createQuestion, updateQuestion, deleteQuestion, reorderQuestions, Question, fetchForms, updateForm } from '../../../lib/api';
 import { generateFormWithAI } from '../../../lib/openrouter';
 import {
