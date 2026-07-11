@@ -1,9 +1,16 @@
 const API_BASE_URL = '/api';
 
+export interface LogicRule {
+  value: string;
+  target_id: number | null;
+}
+
 export interface QuestionSettings {
   options?: string[];
   min?: number;
   max?: number;
+  logic_jumps?: LogicRule[];
+  logic_fallback?: number | null;
 }
 
 export interface Question {

@@ -2,12 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Trash2, Plus } from 'lucide-react';
-import { Question } from '@/lib/api';
-
-export interface LogicRule {
-  value: string;
-  target_id: number | null; // null means 'Next question'
-}
+import { Question, LogicRule } from '@/lib/api';
 
 interface LogicModalProps {
   isOpen: boolean;
