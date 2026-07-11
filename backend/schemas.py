@@ -53,7 +53,7 @@ class QuestionBase(BaseModel):
     title: str
     description: Optional[str] = None
     is_required: bool = False
-    order_index: int
+    order_index: int = 0
     settings: Optional[Dict[str, Any]] = None
 
 class QuestionCreate(QuestionBase):
