@@ -7,7 +7,8 @@ import os
 # Create the database tables
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Typeform Clone API")
+# Disable redirect_slashes to prevent 307 redirects
+app = FastAPI(title="Typeform Clone API", redirect_slashes=False)
 
 # Configure CORS
 origins = [
