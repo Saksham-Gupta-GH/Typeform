@@ -204,32 +204,32 @@ export async function fetchResponses(formId: string) {
 }
 
 // Auth functions
-export async function signIn(name: string, email: string): Promise<{ token: string; name: string; email: string }> {
-  const res = await fetch(`${API_BASE_URL}/auth/signin`, {
+export async function signUp(name: string, email: string, password: string): Promise<{ token: string; name: string; email: string }> {
+  const res = await fetch(`${API_BASE_URL}/auth/signup`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email }),
+    body: JSON.stringify({ name, email, password }),
   });
   
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
-    const errorMsg = typeof errorData.detail === 'string' ? errorData.detail : 'Sign in failed';
+    const errorMsg = typeof errorData.detail === 'string' ? errorData.detail : 'Sign up failed';
     throw new Error(errorMsg);
   }
   
   return res.json();
 }
 
-export async function signInWithGoogle(credential: string): Promise<{ token: string; name: string; email: string }> {
-  const res = await fetch(`${API_BASE_URL}/auth/google`, {
+export async function signIn(email: string, password: string): Promise<{ token: string; name: string; email: string }> {
+  const res = await fetch(`${API_BASE_URL}/auth/signin`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ credential }),
+    body: JSON.stringify({ email, password }),
   });
   
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
-    const errorMsg = typeof errorData.detail === 'string' ? errorData.detail : 'Google Sign in failed';
+    const errorMsg = typeof errorData.detail === 'string' ? errorData.detail : 'Sign in failed';
     throw new Error(errorMsg);
   }
   

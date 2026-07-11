@@ -7,6 +7,15 @@ from database import Base
 def generate_share_token():
     return str(uuid.uuid4())
 
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    email = Column(String, unique=True, index=True)
+    hashed_password = Column(String)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
 class Form(Base):
     __tablename__ = "forms"
 
