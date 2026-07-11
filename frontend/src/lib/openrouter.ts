@@ -4,7 +4,7 @@
  */
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
 interface GeneratedQuestion {
   type: string;
@@ -156,7 +156,7 @@ Rules:
         method: 'POST',
         headers,
         body: JSON.stringify({
-          models: ['openrouter/auto', 'google/gemini-2.5-flash-lite', 'google/gemini-2.0-flash-lite-preview-02-05:free'],
+          models: ['openrouter/auto', 'google/gemini-1.5-flash', 'google/gemini-2.0-flash-lite-preview-02-05:free'],
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: prompt }

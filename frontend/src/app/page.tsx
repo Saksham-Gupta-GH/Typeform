@@ -232,14 +232,10 @@ export default function WorkspaceDashboard() {
             </div>
             <div className="flex-1 p-4 overflow-y-auto">
               <div className="space-y-3 mb-4">
-                {/* Example messages */}
-                <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-700">
-                  <p className="font-medium mb-1">Here's what we did:</p>
-                  <div className="flex items-center gap-2 text-green-700">
-                    <span>✓</span> Created Amazon intern application form.
-                  </div>
+                <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-700">
+                  <p className="font-medium text-purple-700 mb-1">Welcome to Typeform AI!</p>
+                  <p>Describe what kind of form you want to create, and the AI will automatically generate the questions and structure for you.</p>
                 </div>
-                <p className="text-sm text-gray-600">Added. Is there anything else you'd like to include for applicants?</p>
               </div>
             </div>
             <div className="p-4 border-t border-gray-200">
