@@ -52,6 +52,34 @@ def sign_up(request: SignUpRequest, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(new_user)
         
+        # Create a default "Rate Our App" form for the new user
+        default_form = models.Form(
+            title="App Rating Feedback",
+            description="We'd love to hear your thoughts on our app!",
+            user_id=new_user.id,
+            status="draft"
+        )
+        db.add(default_form)
+        db.commit()
+        db.refresh(default_form)
+        
+        q1 = models.Question(
+            form_id=default_form.id,
+            type="rating",
+            title="How would you rate your experience with our app?",
+            is_required=True,
+            order_index=0
+        )
+        q2 = models.Question(
+            form_id=default_form.id,
+            type="long_text",
+            title="Any additional feedback or feature requests?",
+            is_required=False,
+            order_index=1
+        )
+        db.add_all([q1, q2])
+        db.commit()
+        
         token = jwt.encode({"sub": request.email, "name": request.name}, SECRET_KEY, algorithm=ALGORITHM)
         logger.info(f"User signed up: {request.email}")
         return SignInResponse(token=token, name=request.name, email=request.email)
