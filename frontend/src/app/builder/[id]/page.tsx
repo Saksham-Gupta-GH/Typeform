@@ -8,6 +8,7 @@ import {
   RotateCcw, RefreshCw, Monitor, Palette, Link2
 } from 'lucide-react';
 import { WorkflowCanvas } from './WorkflowCanvas';
+import LogicModal from '../../../components/LogicModal';
 import { fetchQuestions, createQuestion, updateQuestion, deleteQuestion, reorderQuestions, Question, fetchForms, updateForm } from '../../../lib/api';
 import { generateFormWithAI } from '../../../lib/openrouter';
 import {
@@ -577,6 +578,7 @@ export default function BuilderPage() {
   const [activeTab, setActiveTab] = useState<'content' | 'design'>('content');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [logicModalOpenFor, setLogicModalOpenFor] = useState<number | null>(null);
   const [formTitle, setFormTitle] = useState('Untitled form');
   const [designSettings, setDesignSettings] = useState({ bgColor: '#ffffff', textColor: '#000000', buttonColor: '#111827', fontFamily: 'sans' });
   const [loading, setLoading] = useState(true);
@@ -695,8 +697,8 @@ export default function BuilderPage() {
     }
   };
 
-  const handleDeleteQuestion = async (id: number, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleDeleteQuestion = async (id: number, e?: React.MouseEvent) => {
+    e?.stopPropagation();
     try {
       await deleteQuestion(id);
       setQuestions(prev => prev.filter(q => q.id !== id));
@@ -1026,6 +1028,7 @@ export default function BuilderPage() {
                 selectedId={selectedId}
                 onNodeClick={(id) => setSelectedId(id)}
                 onPaneClick={() => setSelectedId(null)}
+                onLogicClick={(id) => setLogicModalOpenFor(id)}
               />
             </div>
             {selectedQuestion && (
@@ -1062,6 +1065,20 @@ export default function BuilderPage() {
         )}
 
       </div>
+
+      {/* Logic Modal */}
+      {logicModalOpenFor && questions.find(q => q.id === logicModalOpenFor) && (
+        <LogicModal
+          isOpen={!!logicModalOpenFor}
+          onClose={() => setLogicModalOpenFor(null)}
+          question={questions.find(q => q.id === logicModalOpenFor)!}
+          onDeleteNode={(id) => {
+            handleDeleteQuestion(id);
+            setLogicModalOpenFor(null);
+          }}
+          index={questions.findIndex(q => q.id === logicModalOpenFor)}
+        />
+      )}
     </div>
   );
 }

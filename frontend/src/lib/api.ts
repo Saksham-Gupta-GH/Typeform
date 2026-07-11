@@ -220,6 +220,22 @@ export async function signIn(name: string, email: string): Promise<{ token: stri
   return res.json();
 }
 
+export async function signInWithGoogle(credential: string): Promise<{ token: string; name: string; email: string }> {
+  const res = await fetch(`${API_BASE_URL}/auth/google`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ credential }),
+  });
+  
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    const errorMsg = typeof errorData.detail === 'string' ? errorData.detail : 'Google Sign in failed';
+    throw new Error(errorMsg);
+  }
+  
+  return res.json();
+}
+
 export async function signOut(token: string): Promise<{ message: string }> {
   const res = await fetch(`${API_BASE_URL}/auth/signout`, {
     method: 'POST',
