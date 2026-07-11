@@ -31,7 +31,7 @@ function WelcomeScreen({ form, onStart }: { form: FormResponse; onStart: () => v
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <h1 className="text-4xl font-semibold mb-6">{form.title}</h1>
+        <h1 className="text-3xl md:text-4xl font-semibold mb-6">{form.title}</h1>
         {form.description && <p className="text-xl mb-12 max-w-2xl mx-auto opacity-80">{form.description}</p>}
         <button
           onClick={onStart}
@@ -78,7 +78,7 @@ function QuestionView({ question, index, total, value, onChange, onNext, validat
   const maxStars = question.settings?.max || 5;
 
   return (
-    <div className="flex-1 flex flex-col justify-center px-16 py-12 max-w-3xl mx-auto w-full">
+    <div className="flex-1 flex flex-col justify-center px-6 md:px-16 py-12 max-w-3xl mx-auto w-full">
       {/* Question number + arrow badge */}
       <div className="flex items-start gap-5 mb-8">
         <div className="flex items-center gap-2 flex-shrink-0 mt-1">
@@ -194,7 +194,7 @@ function QuestionView({ question, index, total, value, onChange, onNext, validat
               <button
                 key={star}
                 onClick={() => onChange(star)}
-                className={`text-4xl transition-colors leading-none ${Number(value) >= star ? 'text-yellow-500' : 'text-gray-200'}`}
+                className={`text-3xl md:text-4xl transition-colors leading-none ${Number(value) >= star ? 'text-yellow-500' : 'text-gray-200'}`}
               >
                 ★
               </button>
@@ -258,7 +258,7 @@ function ThankYouScreen() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/>
         </svg>
       </div>
-      <h1 className="text-4xl font-semibold mb-4">Thank you! 🎉</h1>
+      <h1 className="text-3xl md:text-4xl font-semibold mb-4">Thank you! 🎉</h1>
       <p className="text-lg opacity-60">Your response has been recorded.</p>
     </div>
   );

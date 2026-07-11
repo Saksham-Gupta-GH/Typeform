@@ -346,8 +346,8 @@ function QuestionPreview({ question, isWelcome, buttonColor }: { question: Quest
 
   if (isWelcome) {
     return (
-      <div className="flex flex-col items-center justify-center h-full px-16 text-center">
-        <h1 className="text-4xl font-semibold text-gray-900 mb-4">{question.title || 'Form Title'}</h1>
+      <div className="flex flex-col items-center justify-center h-full px-6 md:px-16 text-center">
+        <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4">{question.title || 'Form Title'}</h1>
         {question.description && <p className="text-lg text-gray-500 mb-8 max-w-md">{question.description}</p>}
         <button className="text-white font-semibold py-3 px-8 rounded text-lg transition-colors shadow-sm" style={{ backgroundColor: buttonColor || '#2563eb' }}>start</button>
         <p className="text-gray-400 text-xs mt-3 flex items-center gap-1">
@@ -369,7 +369,7 @@ function QuestionPreview({ question, isWelcome, buttonColor }: { question: Quest
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -15 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="flex flex-col justify-center px-16 py-12 h-full max-w-2xl mx-auto"
+        className="flex flex-col justify-center px-6 md:px-16 py-12 h-full max-w-2xl mx-auto"
       >
       {question.description && (
         <p className="text-sm text-gray-500 mb-4">{question.description}</p>
@@ -459,7 +459,7 @@ function RightSidebar({ question, onChange }: {
 }) {
   if (!question) {
     return (
-      <aside className="w-[300px] bg-white border-l border-gray-200 flex items-center justify-center">
+      <aside className="w-full md:w-[300px] bg-white border-t md:border-t-0 md:border-l border-gray-200 flex items-center justify-center min-h-[100px] md:min-h-0">
         <p className="text-gray-400 text-sm">Select a question</p>
       </aside>
     );
@@ -468,7 +468,7 @@ function RightSidebar({ question, onChange }: {
   const options = question.settings?.options || [];
 
   return (
-    <aside className="w-[300px] bg-white border-l border-gray-200 flex flex-col shadow-[-2px_0_8px_rgba(0,0,0,0.03)]">
+    <aside className="w-full md:w-[300px] bg-white border-t md:border-t-0 md:border-l border-gray-200 flex flex-col shadow-[-2px_0_8px_rgba(0,0,0,0.03)] min-h-[400px] md:min-h-0">
       <div className="p-4 border-b border-gray-100">
         <div className="flex items-center bg-gray-100 rounded-md px-3 py-2 cursor-pointer hover:bg-gray-200 transition-colors">
           <TypeIcon type={question.type} />
@@ -850,9 +850,9 @@ export default function BuilderPage() {
       </header>
 
       {/* ── Main Area ── */}
-      <div className="flex w-full h-full pt-14">
+      <div className="flex flex-col md:flex-row w-full h-full pt-14 overflow-y-auto md:overflow-hidden">
         {/* ── LEFT SIDEBAR ── */}
-        <aside className="w-[272px] bg-[#f9f9f9] border-r border-gray-200 flex flex-col flex-shrink-0">
+        <aside className="w-full md:w-[272px] bg-[#f9f9f9] border-b md:border-b-0 md:border-r border-gray-200 flex flex-col flex-shrink-0 min-h-[300px] md:min-h-0">
           {/* Sidebar Tabs */}
           <div className="flex items-center p-3 border-b border-gray-200 gap-1">
             <button
@@ -943,7 +943,7 @@ export default function BuilderPage() {
             </aside>
 
             {/* ── CENTER CANVAS ── */}
-            <main className="flex-1 flex flex-col relative overflow-hidden">
+            <main className="flex-1 flex flex-col relative overflow-hidden min-h-[500px] md:min-h-0">
               {/* Canvas Toolbar */}
               <div className="h-12 flex items-center justify-between px-6 border-b border-gray-200 bg-white/80 backdrop-blur-sm">
                 <div className="flex items-center gap-3">
@@ -972,7 +972,7 @@ export default function BuilderPage() {
 
               {/* Canvas */}
               <div className="flex-1 flex items-center justify-center p-8 relative overflow-hidden" style={{ backgroundColor: designSettings.bgColor, fontFamily: designSettings.fontFamily === 'mono' ? 'monospace' : designSettings.fontFamily === 'serif' ? 'serif' : 'sans-serif' }}>
-                <div className="w-full max-w-3xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] rounded-2xl min-h-[480px] flex flex-col relative overflow-hidden" style={{ backgroundColor: 'white', color: designSettings.textColor }}>
+                <div className="w-full max-w-3xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] rounded-none md:rounded-2xl min-h-[480px] flex flex-col relative overflow-hidden" style={{ backgroundColor: 'white', color: designSettings.textColor }}>
                   <div className="flex-1">
                     <QuestionPreview question={selectedQuestion} buttonColor={designSettings.buttonColor} />
                   </div>
