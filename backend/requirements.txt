@@ -5,3 +5,5 @@ pydantic
 python-multipart
 gunicorn
 email-validator
+passlib[bcrypt]
+python-jose[cryptography]
