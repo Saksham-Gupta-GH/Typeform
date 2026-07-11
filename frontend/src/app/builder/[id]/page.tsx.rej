@@ -1,9 +1,8 @@
-@@ -334,7 +334,7 @@
+@@ -9,6 +9,7 @@
+ } from '@dnd-kit/sortable';
+ import { CSS } from '@dnd-kit/utilities';
+ import { fetchQuestions, createQuestion, deleteQuestion, updateQuestion, getForm, updateForm } from '@/lib/api';
++import { motion } from 'framer-motion';
  
- // ──────────────────────────────────────────────────────────────
- // Canvas Preview Components
--function QuestionPreview({ question, isWelcome }: { question: Question | null; isWelcome?: boolean }) {
-+function QuestionPreview({ question, isWelcome, buttonColor }: { question: Question | null; isWelcome?: boolean; buttonColor?: string }) {
-   if (!question) {
-     return (
-       <div className="flex items-center justify-center h-full">
+ interface Question {
+   id: number;

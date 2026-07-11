@@ -4,6 +4,7 @@
  */
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 interface GeneratedQuestion {
   type: string;
@@ -23,10 +24,12 @@ export interface GeneratedForm {
   questions: GeneratedQuestion[];
 }
 
-function getApiKey(): string {
-  // Check for env var (set in .env.local)
-  const key = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY || '';
-  return key;
+function getOpenRouterKey(): string {
+  return process.env.NEXT_PUBLIC_OPENROUTER_API_KEY || '';
+}
+
+function getGeminiKey(): string {
+  return process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
 }
 
 // Retry logic with exponential backoff - more aggressive for rate limits
@@ -50,12 +53,10 @@ async function fetchWithRetry(
       
       clearTimeout(timeoutId);
       
-      // Don't retry on most errors
       if (response.status >= 400 && response.status < 500 && response.status !== 429) {
         return response;
       }
       
-      // Retry on 429 (rate limit) or 5xx errors
       if (response.status === 429 || response.status >= 500) {
         if (i < maxRetries - 1) {
           const delayMs = initialDelayMs * Math.pow(2, i);
@@ -80,7 +81,8 @@ async function fetchWithRetry(
 }
 
 export async function generateFormWithAI(prompt: string): Promise<GeneratedForm> {
-  const apiKey = getApiKey();
+  const geminiKey = getGeminiKey();
+  const openRouterKey = getOpenRouterKey();
   
   console.log('[AI] Starting form generation with prompt:', prompt.substring(0, 50) + '...');
   
@@ -112,78 +114,91 @@ Rules:
 - rating should have min:1, max:5 by default
 - Make questions relevant to the form topic`;
 
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    'HTTP-Referer': 'https://typeform-clone.vercel.app',
-    'X-Title': 'Typeform Clone',
-  };
-
-  if (apiKey) {
-    headers['Authorization'] = `Bearer ${apiKey}`;
-    console.log('[AI] Using provided API key');
-  } else {
-    console.log('[AI] Using OpenRouter free tier (no API key)');
-  }
+  let cleanContent = '';
 
   try {
-    console.log('[AI] Sending request to OpenRouter...');
-    const response = await fetchWithRetry(OPENROUTER_API_URL, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        model: 'openrouter/auto',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.7,
-        max_tokens: 1200,
-      }),
-    }, 3, 1500);
+    // 1. Try native Gemini API first if key exists
+    if (geminiKey) {
+      console.log('[AI] Using native Gemini API...');
+      const response = await fetchWithRetry(`${GEMINI_API_URL}?key=${geminiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: { text: systemPrompt } },
+          contents: { parts: { text: prompt } },
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 2000,
+            responseMimeType: "application/json"
+          }
+        }),
+      }, 3, 1500);
 
-    console.log('[AI] Response status:', response.status);
+      if (!response.ok) {
+        console.error('[AI] Gemini API error:', response.status);
+        throw new Error(`Gemini API error (${response.status})`);
+      }
 
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => response.statusText);
-      console.error('[AI] API error response:', response.status, errorText.substring(0, 200));
-      
-      if (response.status === 429) {
-        throw new Error('OpenRouter rate limit exceeded. Please wait a minute and try again.');
+      const data = await response.json();
+      cleanContent = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    } 
+    // 2. Fall back to OpenRouter
+    else {
+      console.log('[AI] Using OpenRouter API...');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://typeform-clone.vercel.app',
+        'X-Title': 'Typeform Clone',
+      };
+      if (openRouterKey) headers['Authorization'] = `Bearer ${openRouterKey}`;
+
+      const response = await fetchWithRetry(OPENROUTER_API_URL, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          models: ['openrouter/auto', 'google/gemini-2.5-flash-lite', 'google/gemini-2.0-flash-lite-preview-02-05:free'],
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0.7,
+          max_tokens: 1500,
+        }),
+      }, 3, 1500);
+
+      if (!response.ok) {
+        throw new Error(`OpenRouter API error (${response.status})`);
       }
-      if (response.status >= 500) {
-        throw new Error('OpenRouter service error. Try again in a few seconds.');
-      }
-      throw new Error(`OpenRouter error (${response.status})`);
+
+      const data = await response.json();
+      const rawContent = data.choices?.[0]?.message?.content || '';
+      cleanContent = rawContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     }
 
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
-    
-    if (!content) {
-      console.error('[AI] No content in response:', data);
+    if (!cleanContent) {
       throw new Error('AI returned empty response');
     }
 
-    console.log('[AI] Parsing response (length:', content.length + ')...');
-    const cleanContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    console.log('[AI] Parsing response...');
     
-    try {
-      const parsed = JSON.parse(cleanContent);
-      
-      if (!parsed.questions || !Array.isArray(parsed.questions)) {
-        console.error('[AI] Invalid structure:', parsed);
-        throw new Error('Invalid response structure');
-      }
-
-      console.log('[AI] Success! Generated', parsed.questions.length, 'questions');
-      return parsed as GeneratedForm;
-    } catch (parseErr) {
-      console.error('[AI] Parse error:', parseErr, 'Content:', cleanContent.substring(0, 300));
-      throw new Error('Failed to parse AI response');
+    const parsed = JSON.parse(cleanContent);
+    
+    if (!parsed.questions || !Array.isArray(parsed.questions)) {
+      throw new Error('Invalid response structure');
     }
+
+    // Sanitize AI Output
+    parsed.questions = parsed.questions.map((q: any) => ({
+      ...q,
+      is_required: q.is_required === true || q.is_required === 'true' || q.is_required === 'True',
+      settings: q.settings || null
+    }));
+
+    console.log('[AI] Success! Generated', parsed.questions.length, 'questions');
+    return parsed as GeneratedForm;
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
-      console.error('[AI] Request timeout after 25 seconds');
+      console.error('[AI] Request timeout');
       throw new Error('AI request timed out. Service is busy, please try again.');
     }
     console.error('[AI] Error:', error instanceof Error ? error.message : String(error));
